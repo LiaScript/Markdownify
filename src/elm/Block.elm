@@ -58,9 +58,17 @@ element =
             , citation
             , quiz
             , gallery
+            , formula
             , Json.string
             ]
         )
+
+
+formula : Json.Decoder String
+formula =
+    Inline.stringOrList
+        |> Json.field "formula"
+        |> Json.map (\f -> "$$" ++ f ++ "$$")
 
 
 blockquote : Json.Decoder String

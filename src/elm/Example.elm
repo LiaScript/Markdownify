@@ -411,6 +411,15 @@ json =
           ]
         }
       ]
+    },
+    {
+      "title": "`formula`",
+      "indent": 3,
+      "body": [
+        {
+          "formula": "x = \\frac{1}{3}"
+        }
+      ]
     }
   ]
 }"""

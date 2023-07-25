@@ -6,8 +6,7 @@
   "types": "dist/lib.d.ts",
   "scripts": {
     "watch": "npx parcel serve src/demo.html --open",
-    "build": "npx parcel build src/lib.ts",
-    "lib": "tsc --module commonjs -d src/lib.ts --outDir dist"
+    "build": "npx parcel build src/lib.ts"
   },
   "keywords": [
     "LiaScript",

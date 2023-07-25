@@ -26,9 +26,7 @@ element =
         ([ Json.string
          , Json.field "bold" (Json.map (\s -> "__" ++ s ++ "__") elementsOrString)
          , Json.field "footnote" (Json.map (\s -> "[^" ++ s ++ "]") Json.string)
-
-         --"effect"
-         --"html"
+         , effect
          , input
          , Json.field "formula" (Json.map (\s -> "$ " ++ s ++ " $") Json.string)
          , Json.field "italic" (Json.map (\s -> "_" ++ s ++ "_") elementsOrString)
@@ -44,8 +42,54 @@ element =
         )
         toComment
     , script
+    , html
     ]
         |> Json.oneOf
+
+
+effect : Json.Decoder String
+effect =
+    Json.map5
+        (\body begin end playback voice ->
+            let
+                def =
+                    [ begin
+                    , end
+                    , playback
+                    , voice
+                    ]
+                        |> List.map (Maybe.withDefault "")
+                        |> String.join " "
+            in
+            "{" ++ def ++ "}{" ++ body ++ "}"
+        )
+        (Json.field "effect" elementsOrString)
+        (Json.int
+            |> Json.field "begin"
+            |> Json.maybe
+            |> Json.map (Maybe.map String.fromInt)
+        )
+        (Json.int
+            |> Json.field "end"
+            |> Json.maybe
+            |> Json.map (Maybe.map String.fromInt)
+        )
+        (Json.bool
+            |> Json.field "playback"
+            |> Json.maybe
+            |> Json.map
+                (\playback ->
+                    if playback == Just True then
+                        Just "|>"
+
+                    else
+                        Nothing
+                )
+        )
+        (Json.string
+            |> Json.field "voice"
+            |> Json.maybe
+        )
 
 
 toComment : Json.Decoder String
@@ -72,6 +116,8 @@ attributes =
         |> Json.maybe
 
 
+{-| Reference decoder, required fields are link and url, alt and title are optional.
+-}
 link : Json.Decoder String
 link =
     Json.map4 (\link_ alt_ url_ title_ -> link_ ++ "[" ++ alt_ ++ "](" ++ url_ ++ title_ ++ ")")
@@ -122,6 +168,25 @@ script =
                 ++ "\n</ script>"
         )
         (Json.field "script" stringOrList)
+        attributes
+
+
+html : Json.Decoder String
+html =
+    Json.map3
+        (\tag body attr ->
+            "<"
+                ++ tag
+                ++ " "
+                ++ Maybe.withDefault "" attr
+                ++ ">"
+                ++ body
+                ++ "</"
+                ++ tag
+                ++ ">"
+        )
+        (Json.field "html" Json.string)
+        (Json.field "body" elementsOrString)
         attributes
 
 

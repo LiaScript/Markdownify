@@ -1,0 +1,25 @@
+{
+  "name": "@liascript/markdownify",
+  "version": "0.0.1",
+  "description": "Create LiaScript documents from a common JSON-model",
+  "scripts": {
+    "watch": "npx parcel serve src/demo.html --open",
+    "build": "npx parcel build src/index.ts"
+  },
+  "keywords": [
+    "LiaScript",
+    "Json",
+    "Markdown",
+    "OER",
+    "Education"
+  ],
+  "author": "André Dietrich",
+  "license": "ISC",
+  "dependencies": {
+    "parcel": "^2.9.3"
+  },
+  "devDependencies": {
+    "@parcel/transformer-elm": "^2.9.3",
+    "elm": "^0.19.1-5"
+  }
+}

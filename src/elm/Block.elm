@@ -59,6 +59,13 @@ element =
             , quiz
             , gallery
             , formula
+
+            --, table
+            --, code
+            --, survey
+            --, effect
+            --, html
+            , tasks
             , Json.string
             ]
         )
@@ -68,7 +75,7 @@ formula : Json.Decoder String
 formula =
     Inline.stringOrList
         |> Json.field "formula"
-        |> Json.map (\f -> "$$" ++ f ++ "$$")
+        |> Json.map (\f -> "$$ " ++ f ++ " $$")
 
 
 blockquote : Json.Decoder String
@@ -150,7 +157,7 @@ orderedList =
                         >> List.indexedMap
                             (\i l ->
                                 if i == 0 then
-                                    String.fromInt id ++ ". " ++ l
+                                    String.fromInt (id + 1) ++ ". " ++ l
 
                                 else
                                     "   " ++ l
@@ -221,20 +228,61 @@ chart =
             )
 
 
+tasks : Json.Decoder String
+tasks =
+    Json.map3
+        (\task done append ->
+            (task
+                |> List.indexedMap
+                    (\i t ->
+                        if List.member i done then
+                            "- [X] " ++ t
+
+                        else
+                            "- [ ] " ++ t
+                    )
+                |> String.join "\n"
+            )
+                ++ append
+        )
+        (Json.field "tasks" (Json.list elementsOrString))
+        ([ Json.list Json.int
+         , Json.list Json.bool
+            |> Json.map
+                (List.indexedMap Tuple.pair
+                    >> List.filterMap
+                        (\( i, b ) ->
+                            if b then
+                                Just i
+
+                            else
+                                Nothing
+                        )
+                )
+         ]
+            |> Json.oneOf
+            |> Json.field "done"
+            |> Json.maybe
+            |> Json.map (Maybe.withDefault [])
+        )
+        appendix
+
+
 quiz : Json.Decoder String
 quiz =
-    Json.map3
-        (\q hints answer ->
+    Json.map4
+        (\q hints answer append ->
             case hints of
                 Nothing ->
-                    q ++ answer
+                    q ++ answer ++ append
 
                 Just h ->
-                    q ++ "\n" ++ h ++ answer
+                    q ++ "\n" ++ h ++ answer ++ append
         )
         quizType
         quizHints
         quizAnswer
+        appendix
 
 
 quizType : Json.Decoder String
@@ -314,3 +362,12 @@ gallery =
     Json.list Inline.link
         |> Json.map (String.join "\n")
         |> Json.field "gallery"
+
+
+appendix : Json.Decoder String
+appendix =
+    Inline.stringOrList
+        |> Json.field "appendix"
+        |> Json.map (\s -> "\n" ++ s)
+        |> Json.maybe
+        |> Json.map (Maybe.withDefault "")

@@ -3,6 +3,7 @@ module Inline exposing (..)
 import Dict
 import Html.Attributes exposing (type_)
 import Json.Decode as Json
+import Json.Encode exposing (encode)
 
 
 elementsOrString : Json.Decoder String
@@ -104,10 +105,25 @@ toComment =
 attributes : Json.Decoder (Maybe String)
 attributes =
     [ Json.string
-    , Json.dict Json.string
+    , [ Json.string
+      , Json.map String.fromInt Json.int
+      , Json.map String.fromFloat Json.float
+      , Json.map
+            (\b ->
+                if b then
+                    "true"
+
+                else
+                    "false"
+            )
+            Json.bool
+      , Json.map (encode 0) Json.value
+      ]
+        |> Json.oneOf
+        |> Json.dict
         |> Json.map
             (Dict.toList
-                >> List.map (\( k, v ) -> k ++ "=" ++ v)
+                >> List.map (\( k, v ) -> "\"" ++ k ++ "\"=\"" ++ v ++ "\"")
                 >> String.join " "
             )
     ]

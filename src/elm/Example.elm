@@ -5,7 +5,7 @@ json =
     """{
   "meta": {
     "author": "LiaScript",
-    "version": "1.2",
+    "version": "1.3",
     "lang": "de"
   },
   "sections": [
@@ -276,35 +276,6 @@ json =
               }
             ]
           ]
-        },
-        {
-          "hr": null
-        },
-        "... But, as there are multiple options, you can define also multiple solutions too.",
-        {
-          "quiz": "selection",
-          "solution": [
-            0,
-            2
-          ],
-          "options": [
-            "option 0",
-            "option 1",
-            [
-              {
-                "bold": "this is Bold"
-              }
-            ]
-          ],
-          "hints": [
-            "hint number one",
-            "the second and last hint"
-          ],
-          "answer": [
-            "asdfasfd",
-            "asdfasfddf"
-          ],
-          "attributes": "'data-trials'='11'"
         }
       ]
     },
@@ -382,6 +353,42 @@ json =
       ]
     },
     {
+      "title": "Tweaks",
+      "indent": 4,
+      "body": [
+        "The solution is defined by its position in the option list...",
+        "... But, as there are multiple options, you can define also multiple solutions too.",
+        {
+          "quiz": "selection",
+          "solution": [
+            0,
+            2
+          ],
+          "options": [
+            "option 0",
+            "option 1",
+            [
+              {
+                "bold": "this is Bold"
+              }
+            ]
+          ],
+          "hints": [
+            "hint number one",
+            "the second and last hint"
+          ],
+          "answer": [
+            "These blocks will only be visible...",
+            "... if and only if, the quiz is solved",
+            "or if the user clicks onto the resolve button."
+          ],
+          "attributes": {
+            "data-trials": 5
+          }
+        }
+      ]
+    },
+    {
       "title": "`gallery`",
       "indent": 3,
       "body": [
@@ -413,11 +420,33 @@ json =
       ]
     },
     {
-      "title": "`formula`",
+      "title": "`tasks`",
       "indent": 3,
       "body": [
+        "Tasks are defined by a task and by a done list:",
         {
-          "formula": "x = \\frac{1}{3}"
+          "tasks": [
+            "task 1",
+            "task 2",
+            "task 3"
+          ],
+          "done": [
+            true,
+            false,
+            true
+          ]
+        },
+        "Additionally it is possible to define a done list with only checked positions:",
+        {
+          "tasks": [
+            "task 1",
+            "task 2",
+            "task 3"
+          ],
+          "done": [
+            0,
+            2
+          ]
         }
       ]
     }

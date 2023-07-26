@@ -1,0 +1,6 @@
+example/
+src/
+elm-stuff/
+.parcel-cache/
+elm.json
+tsconfig.json

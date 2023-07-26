@@ -60,8 +60,9 @@ element =
             , gallery
             , formula
             , table
+            , code
+            , project
 
-            --, code
             --, survey
             --, effect
             --, html
@@ -414,6 +415,78 @@ gallery =
     Json.list Inline.link
         |> Json.map (String.join "\n")
         |> Json.field "gallery"
+
+
+project : Json.Decoder String
+project =
+    Json.map2
+        (\files append ->
+            String.join "\n" files ++ append
+        )
+        ([ Json.list code
+         , Json.map List.singleton code
+         ]
+            |> Json.oneOf
+            |> Json.field "project"
+        )
+        appendix
+
+
+code : Json.Decoder String
+code =
+    Json.map5
+        (\c lang title closed attr ->
+            case ( lang, title, closed ) of
+                ( Just l, Nothing, _ ) ->
+                    "``` "
+                        ++ l
+                        ++ "\n"
+                        ++ c
+                        ++ "\n```"
+
+                ( Just l, Just t, Nothing ) ->
+                    "``` "
+                        ++ l
+                        ++ "   "
+                        ++ t
+                        ++ "\n"
+                        ++ c
+                        ++ "\n```"
+
+                ( Just l, Just t, Just no ) ->
+                    "``` "
+                        ++ l
+                        ++ "   "
+                        ++ (if no then
+                                "-"
+
+                            else
+                                "+"
+                           )
+                        ++ t
+                        ++ "\n"
+                        ++ c
+                        ++ "\n```"
+
+                _ ->
+                    "```\n" ++ c ++ "\n```"
+        )
+        (Inline.stringOrList
+            |> Json.field "code"
+        )
+        (Json.string
+            |> Json.field "language"
+            |> Json.maybe
+        )
+        (Json.string
+            |> Json.field "name"
+            |> Json.maybe
+        )
+        (Json.bool
+            |> Json.field "closed"
+            |> Json.maybe
+        )
+        Inline.attributes
 
 
 appendix : Json.Decoder String

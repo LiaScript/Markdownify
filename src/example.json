@@ -427,6 +427,47 @@
           }
         }
       ]
+    },
+    {
+      "title": "`code`",
+      "indent": 3,
+      "body": [
+        {
+          "code": [
+            "This is a simple code block",
+            "with multiple lines",
+            "and a specific language",
+            "for syntax highlighting"
+          ],
+          "language": "javascript",
+          "attributes": {
+            "data-trials": 5
+          },
+          "name": "test.js",
+          "closed": true
+        }
+      ]
+    },
+    {
+      "title": "`project`",
+      "indent": 3,
+      "body": [
+        {
+          "project": [
+            {
+              "code": "var i = 0;",
+              "language": "javascript",
+              "name": "var.js"
+            },
+            {
+              "code": "alert(\"Hallo Welt\")",
+              "language": "javascript",
+              "name": "alert.js"
+            }
+          ],
+          "appendix": "@eval"
+        }
+      ]
     }
   ]
 }

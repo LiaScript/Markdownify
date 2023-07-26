@@ -861,4 +861,85 @@ Tables are defined by a head and a row, the orientation is optional
 }
 ```
 
+### Code-Snippets
+
+The code is passed as a single string or a list of strings, language, name, and closed are optional parameters.
+
+```` markdown
+### `code`
+
+``` javascript   -test.js
+This is a simple code block
+with multiple lines
+and a specific language
+for syntax highlighting
+```
+````
+
+---
+
+``` json
+{
+  "title": "`code`",
+  "indent": 3,
+  "body": [
+    {
+      "code": [
+        "This is a simple code block",
+        "with multiple lines",
+        "and a specific language",
+        "for syntax highlighting"
+      ],
+      "language": "javascript",
+      "name": "test.js",
+      "closed": true
+    }
+  ]
+}
+```
+
+### Projects
+
+A project can be defined by a single code-block or by a list of code-blocks.
+Additionally it is possible to add an appendix, which is either a script or a macro that evaluates to a script, and that defines how the code can be made executable.
+
+
+```` markdown
+### `project`
+
+``` javascript   var.js
+var i = 0;
+```
+``` javascript   alert.js
+alert("Hallo Welt")
+```
+@eval
+````
+
+---
+
+``` json
+{
+  "title": "`project`",
+  "indent": 3,
+  "body": [
+    {
+      "project": [
+        {
+          "code": "var i = 0;",
+          "language": "javascript",
+          "name": "var.js"
+        },
+        {
+          "code": "alert(\"Hallo Welt\")",
+          "language": "javascript",
+          "name": "alert.js"
+        }
+      ],
+      "appendix": "@eval"
+    }
+  ]
+}
+```
+
 ## Inline Elements

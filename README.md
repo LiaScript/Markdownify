@@ -942,4 +942,30 @@ alert("Hallo Welt")
 }
 ```
 
+### HTML
+
+``` markdown
+### `html`
+
+<section "style"="color: red;">This is a simple HTML element</section>
+```
+
+---
+
+``` json
+{
+  "title": "`html`",
+  "indent": 3,
+  "body": [
+    {
+      "html": "section",
+      "body": [{ "paragraph": "This is a simple HTML element" }],
+      "attributes": {
+        "style": "color: red;"
+      }
+    }
+  ]
+}
+```
+
 ## Inline Elements

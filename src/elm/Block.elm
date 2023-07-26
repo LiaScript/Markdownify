@@ -35,41 +35,43 @@ elementsOrString =
 
 element : Json.Decoder String
 element =
-    Json.map2
-        (\attr elem ->
-            (if String.isEmpty attr then
-                ""
+    Json.oneOf
+        [ Json.map2
+            (\attr elem ->
+                (if String.isEmpty attr then
+                    ""
 
-             else
-                attr ++ "\n"
+                 else
+                    attr ++ "\n"
+                )
+                    ++ elem
             )
-                ++ elem
-        )
-        Inline.toComment
-        (Json.oneOf
-            [ paragraph
-            , horizontalRule
-            , blockquote
-            , comment
-            , unorderedList
-            , orderedList
-            , assciiArt
-            , chart
-            , citation
-            , quiz
-            , gallery
-            , formula
-            , table
-            , code
-            , project
+            Inline.toComment
+            (Json.oneOf
+                [ paragraph
+                , horizontalRule
+                , blockquote
+                , comment
+                , unorderedList
+                , orderedList
+                , assciiArt
+                , chart
+                , citation
+                , quiz
+                , gallery
+                , formula
+                , table
+                , code
+                , project
 
-            --, survey
-            --, effect
-            --, html
-            , tasks
-            , Json.string
-            ]
-        )
+                --, survey
+                --, effect
+                , tasks
+                , Json.string
+                ]
+            )
+        , Inline.html elementsOrString
+        ]
 
 
 formula : Json.Decoder String

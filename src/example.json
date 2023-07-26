@@ -468,6 +468,19 @@
           "appendix": "@eval"
         }
       ]
+    },
+    {
+      "title": "`html`",
+      "indent": 3,
+      "body": [
+        {
+          "html": "section",
+          "body": [{ "paragraph": "This is a simple HTML element" }],
+          "attributes": {
+            "style": "color: red;"
+          }
+        }
+      ]
     }
   ]
 }

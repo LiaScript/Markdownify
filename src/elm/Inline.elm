@@ -50,7 +50,7 @@ element =
         )
         toComment
     , script
-    , html
+    , html elementsOrString
     ]
         |> Json.oneOf
 
@@ -194,8 +194,8 @@ script =
         attributes
 
 
-html : Json.Decoder String
-html =
+html : Json.Decoder String -> Json.Decoder String
+html decoder =
     Json.map3
         (\tag body attr ->
             "<"
@@ -209,7 +209,7 @@ html =
                 ++ ">"
         )
         (Json.field "html" Json.string)
-        (Json.field "body" elementsOrString)
+        (Json.field "body" decoder)
         attributes
 
 

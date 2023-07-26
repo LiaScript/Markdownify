@@ -20,24 +20,31 @@ elements =
         |> Json.map (String.join "")
 
 
+fields : List String -> Json.Decoder String -> Json.Decoder String
+fields ids decoder =
+    ids
+        |> List.map (\id -> Json.field id decoder)
+        |> Json.oneOf
+
+
 element : Json.Decoder String
 element =
     [ Json.map2
         (++)
         ([ Json.string
-         , Json.field "bold" (Json.map (\s -> "__" ++ s ++ "__") elementsOrString)
+         , fields [ "bold", "b" ] (Json.map (\s -> "__" ++ s ++ "__") elementsOrString)
          , Json.field "footnote" (Json.map (\s -> "[^" ++ s ++ "]") Json.string)
          , effect
          , input
-         , Json.field "formula" (Json.map (\s -> "$ " ++ s ++ " $") Json.string)
-         , Json.field "italic" (Json.map (\s -> "_" ++ s ++ "_") elementsOrString)
+         , fields [ "formula", "math" ] (Json.map (\s -> "$ " ++ s ++ " $") Json.string)
+         , fields [ "italic", "i" ] (Json.map (\s -> "_" ++ s ++ "_") elementsOrString)
          , link
-         , Json.field "strike" (Json.map (\s -> "~" ++ s ++ "~") elementsOrString)
+         , fields [ "strike", "s" ] (Json.map (\s -> "~" ++ s ++ "~") elementsOrString)
          , Json.field "string" Json.string
          , Json.field "symbol" Json.string
-         , Json.field "superscript" (Json.map (\s -> "^" ++ s ++ "^") elementsOrString)
-         , Json.field "underline" (Json.map (\s -> "~~" ++ s ++ "~~") elementsOrString)
-         , Json.field "verbatim" (Json.map (\s -> "`" ++ s ++ "`") elementsOrString)
+         , fields [ "superscript", "sup" ] (Json.map (\s -> "^" ++ s ++ "^") elementsOrString)
+         , fields [ "underline", "u" ] (Json.map (\s -> "~~" ++ s ++ "~~") elementsOrString)
+         , fields [ "code", "verbatim" ] (Json.map (\s -> "`" ++ s ++ "`") elementsOrString)
          ]
             |> Json.oneOf
         )

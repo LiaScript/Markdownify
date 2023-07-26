@@ -59,8 +59,8 @@ element =
             , quiz
             , gallery
             , formula
+            , table
 
-            --, table
             --, code
             --, survey
             --, effect
@@ -85,6 +85,58 @@ blockquote =
     ]
         |> Json.oneOf
         |> Json.map (addIndentation "> ")
+
+
+table : Json.Decoder String
+table =
+    Json.field "table"
+        (Json.map3
+            (\head orientation rows ->
+                let
+                    orient =
+                        orientation
+                            |> Maybe.map
+                                (List.map
+                                    (\o ->
+                                        case o of
+                                            "left" ->
+                                                ":----"
+
+                                            "right" ->
+                                                "----:"
+
+                                            "center" ->
+                                                ":---:"
+
+                                            _ ->
+                                                "-----"
+                                    )
+                                )
+                            |> Maybe.withDefault
+                                (List.repeat
+                                    (List.length head)
+                                    "-----"
+                                )
+                in
+                rows
+                    |> List.map (String.join " | ")
+                    |> (++) [ String.join " | " orient ]
+                    |> (++) [ String.join " | " head ]
+                    |> List.map (\r -> "| " ++ r ++ " |")
+                    |> String.join "\n"
+            )
+            (Json.list Inline.elementsOrString
+                |> Json.field "head"
+            )
+            (Json.list Json.string
+                |> Json.field "orientation"
+                |> Json.maybe
+            )
+            (Json.list Inline.elementsOrString
+                |> Json.list
+                |> Json.field "rows"
+            )
+        )
 
 
 citation : Json.Decoder String

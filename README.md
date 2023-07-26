@@ -2,6 +2,61 @@
 
 Create LiaScript documents from a common JSON-model
 
+## Install
+
+Install directly via npm:
+
+``` bash
+npm install @liascript/markdownify
+```
+
+## Usage
+
+Currently there is only one function that takes as an input-parameter either a string or a JSON/Object directly.
+`liascriptify` will return a promise that will either return the correct LiaScript-Markdown document or it will return an error message.
+
+
+``` typescript
+import liascriptify from './node_modules/@liascript/markdownify/dist/lib'
+
+const example = {
+  meta: {
+    author: 'Superhero',
+    email: 'superhero@web.de',
+  },
+  sections: [
+    {
+      title: 'Title',
+      indent: 1,
+      body: [
+        'This can be either a list of Strings',
+        'that are interpreted as Markdown-blocks',
+        {
+          paragraph: [
+            { string: 'Or a set of ' },
+            {
+              bold: [
+                { string: 'more sophisticated '},
+                { superscript: 'elements' },
+              ],
+            },
+            '!',
+          ],
+        },
+      ],
+    },
+  ],
+}
+
+liascriptify(example)
+  .then((doc: string) => {
+    console.log('ok', doc)
+  })
+  .catch((err: string) => {
+    console.warn('err', err)
+  })
+```
+
 ## Base structure
 
 The basic structure of a LiaScript-Json format is rather simple, you can either directly pass Markdown as a string or you can break it down to collections of block and inline elements. Every Json-file has the following structure:
@@ -64,7 +119,7 @@ that are interpreted as Markdown-blocks
 Or a set of __more sophisticated ^elements^__!
 ```
 
-## Body
+## Body: Block-Elements
 
 ``` markdown
 # Body 1
@@ -191,10 +246,7 @@ but it can also__be a simple list__^of multiple $ inline elements $^.
         [
           "But it is also possible",
           {
-            "ul": [
-              "put group multiple blocks into",
-              "a single list"
-            ]
+            "ul": ["put group multiple elements within", "a single list"]
           }
         ]
       ]
@@ -245,10 +297,7 @@ but it can also__be a simple list__^of multiple $ inline elements $^.
         [
           "Grouping works exactly the same way,",
           {
-            "ul": [
-              "simply put multiple elements",
-              "into a single list"
-            ]
+            "ul": ["simply put multiple elements", "into a single list"]
           }
         ]
       ]
@@ -774,3 +823,42 @@ Additionally it is possible to define a done list with only checked positions:
   ]
 }
 ```
+
+### Tables
+
+``` markdown
+### `table`
+
+Tables are defined by a head and a row, the orientation is optional
+
+| head 1 | head 2 | __head 3__ |
+| :----- | -----: | :--------: |
+| 1      |      2 |      3     |
+| 4      |      5 |      6     |
+| 7      |      8 |      9     |
+```
+
+---
+
+``` json
+{
+  "title": "`table`",
+  "indent": 3,
+  "body": [
+    "Tables are defined by a head and a row, the orientation is optional",
+    {
+      "table": {
+        "head": ["head 1", "head 2", [{ "bold": "head 3" }]],
+        "orientation": ["left", "right", "center"],
+        "rows": [
+          ["1", "2", "3"],
+          ["4", "5", "6"],
+          ["7", "8", "9"]
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Inline Elements

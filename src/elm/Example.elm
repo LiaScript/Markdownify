@@ -73,10 +73,7 @@ json =
             [
               "But it is also possible",
               {
-                "ul": [
-                  "put group multiple elements within",
-                  "a single list"
-                ]
+                "ul": ["put group multiple elements within", "a single list"]
               }
             ]
           ]
@@ -99,10 +96,7 @@ json =
             [
               "Grouping works exactly the same way,",
               {
-                "ul": [
-                  "simply put multiple elements",
-                  "into a single list"
-                ]
+                "ul": ["simply put multiple elements", "into a single list"]
               }
             ]
           ]
@@ -151,12 +145,7 @@ json =
               "q": [
                 "of various different blocks",
                 {
-                  "ul": [
-                    "lists",
-                    "blockquotes",
-                    "tables",
-                    "etc."
-                  ]
+                  "ul": ["lists", "blockquotes", "tables", "etc."]
                 }
               ]
             }
@@ -340,11 +329,7 @@ json =
               {
                 "input": "selection",
                 "solution": 1,
-                "options": [
-                  "option1",
-                  "option2",
-                  "option3"
-                ]
+                "options": ["option1", "option2", "option3"]
               },
               " some more test "
             ]
@@ -360,10 +345,7 @@ json =
         "... But, as there are multiple options, you can define also multiple solutions too.",
         {
           "quiz": "selection",
-          "solution": [
-            0,
-            2
-          ],
+          "solution": [0, 2],
           "options": [
             "option 0",
             "option 1",
@@ -373,10 +355,7 @@ json =
               }
             ]
           ],
-          "hints": [
-            "hint number one",
-            "the second and last hint"
-          ],
+          "hints": ["hint number one", "the second and last hint"],
           "answer": [
             "These blocks will only be visible...",
             "... if and only if, the quiz is solved",
@@ -425,28 +404,31 @@ json =
       "body": [
         "Tasks are defined by a task and by a done list:",
         {
-          "tasks": [
-            "task 1",
-            "task 2",
-            "task 3"
-          ],
-          "done": [
-            true,
-            false,
-            true
-          ]
+          "tasks": ["task 1", "task 2", "task 3"],
+          "done": [true, false, true]
         },
         "Additionally it is possible to define a done list with only checked positions:",
         {
-          "tasks": [
-            "task 1",
-            "task 2",
-            "task 3"
-          ],
-          "done": [
-            0,
-            2
-          ]
+          "tasks": ["task 1", "task 2", "task 3"],
+          "done": [0, 2]
+        }
+      ]
+    },
+    {
+      "title": "`table`",
+      "indent": 3,
+      "body": [
+        "Tables are defined by a head and a row, the orientation is optional",
+        {
+          "table": {
+            "head": ["head 1", "head 2", [{ "bold": "head 3" }]],
+            "orientation": ["left", "right", "center"],
+            "rows": [
+              ["1", "2", "3"],
+              ["4", "5", "6"],
+              ["7", "8", "9"]
+            ]
+          }
         }
       ]
     }

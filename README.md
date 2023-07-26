@@ -969,3 +969,111 @@ alert("Hallo Welt")
 ```
 
 ## Inline Elements
+
+``` markdown
+### Inline Elements`
+
+final strings are normal strings or string objects
+
+Additionally it is possible to add attributes to all inline-elements<!-- "style"="color: green; display: block" -->
+
+__this is a bold string__
+
+_this is a italic string_
+
+___this is a bold and italic string___
+
+~~this is a underlined string~~ ~this is a striked string~ ~~this is a underlined ~and striked string~~~
+
+^this is a superscript string^
+
+This is a $ \frac{1}{x} $
+
+A code `__Verbatim code__`
+
+And a piece of <span "id"="foo" "style"="color: green; display: block">content</span>
+```
+
+
+----
+
+``` json
+{
+  "title": "Inline Elements`",
+  "indent": 3,
+  "body": [
+    {
+      "p": [
+        "final strings are normal strings or ",
+        { "string": "string objects" }
+      ]
+    },
+    {
+      "p": [
+        "Additionally it is possible to add attributes to all ",
+        {
+          "string": "inline-elements",
+          "attributes": { "style": "color: green; display: block" }
+        }
+      ]
+    },
+    {
+      "p": [
+        {
+          "bold": "this is a bold string"
+        }
+      ]
+    },
+    {
+      "p": [
+        {
+          "italic": "this is a italic string"
+        }
+      ]
+    },
+    {
+      "p": [
+        {
+          "bold": [{ "italic": "this is a bold and italic string" }]
+        }
+      ]
+    },
+    {
+      "p": [
+        {
+          "underline": "this is a underlined string"
+        },
+        " ",
+        {
+          "strike": "this is a striked string"
+        },
+        " ",
+        {
+          "underline": [
+            "this is a underlined ",
+            {
+              "strike": "and striked string"
+            }
+          ]
+        }
+      ]
+    },
+    { "p": [{ "superscript": "this is a superscript string" }] },
+    { "p": ["This is a ", { "formula": "\\frac{1}{x}" }] },
+    { "p": ["A code ", { "verbatim": "__Verbatim code__" }] },
+    {
+      "p": [
+        "And a piece of ",
+        {
+          "html": "span",
+          "body": "content",
+          "attributes": {
+            "id": "foo",
+            "style": "color: green; display: block"
+          }
+        }
+      ]
+    }
+  ]
+}
+```

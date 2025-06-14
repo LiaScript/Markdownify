@@ -34,7 +34,10 @@ element =
         ([ Json.string
          , fields [ "bold", "b" ] (Json.map (\s -> "__" ++ s ++ "__") elementsOrString)
          , Json.field "footnote" (Json.map (\s -> "[^" ++ s ++ "]") Json.string)
-         , effect
+         , elementsOrString
+            |> Json.field "effect"
+            |> effect
+            |> Json.map (\( def, body ) -> "{" ++ def ++ "}{" ++ body ++ "}")
          , input
          , fields [ "formula", "math" ] (Json.map (\s -> "$ " ++ s ++ " $") Json.string)
          , fields [ "italic", "i" ] (Json.map (\s -> "_" ++ s ++ "_") elementsOrString)
@@ -50,28 +53,54 @@ element =
         )
         toComment
     , script
-    , html elementsOrString
+    , html Nothing elementsOrString
     ]
         |> Json.oneOf
 
 
-effect : Json.Decoder String
-effect =
+effect : Json.Decoder String -> Json.Decoder ( String, String )
+effect decoder =
     Json.map5
         (\body begin end playback voice ->
             let
-                def =
-                    [ begin
-                    , end
-                    , playback
-                    , voice
-                    ]
-                        |> List.map (Maybe.withDefault "")
-                        |> String.join " "
+                steps =
+                    case ( begin, end ) of
+                        ( Just b, Nothing ) ->
+                            Just b
+
+                        ( Just b, Just e ) ->
+                            Just (b ++ "-" ++ e)
+
+                        _ ->
+                            Nothing
+
+                play =
+                    case ( playback, voice ) of
+                        ( Just True, Nothing ) ->
+                            Just "!>"
+
+                        ( Just True, Just v ) ->
+                            Just ("!> " ++ v)
+
+                        _ ->
+                            Nothing
             in
-            "{" ++ def ++ "}{" ++ body ++ "}"
+            ( case ( steps, play ) of
+                ( Just s, Nothing ) ->
+                    s
+
+                ( Nothing, Just p ) ->
+                    p
+
+                ( Just s, Just p ) ->
+                    s ++ " " ++ p
+
+                _ ->
+                    ""
+            , body
+            )
         )
-        (Json.field "effect" elementsOrString)
+        decoder
         (Json.int
             |> Json.field "begin"
             |> Json.maybe
@@ -85,14 +114,6 @@ effect =
         (Json.bool
             |> Json.field "playback"
             |> Json.maybe
-            |> Json.map
-                (\playback ->
-                    if playback == Just True then
-                        Just "|>"
-
-                    else
-                        Nothing
-                )
         )
         (Json.string
             |> Json.field "voice"
@@ -194,8 +215,8 @@ script =
         attributes
 
 
-html : Json.Decoder String -> Json.Decoder String
-html decoder =
+html : Maybe String -> Json.Decoder String -> Json.Decoder String
+html separator decoder =
     Json.map3
         (\tag body attr ->
             "<"
@@ -203,7 +224,9 @@ html decoder =
                 ++ " "
                 ++ Maybe.withDefault "" attr
                 ++ ">"
+                ++ Maybe.withDefault "" separator
                 ++ body
+                ++ Maybe.withDefault "" separator
                 ++ "</"
                 ++ tag
                 ++ ">"

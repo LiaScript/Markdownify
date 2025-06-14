@@ -65,12 +65,12 @@ element =
                 , project
 
                 --, survey
-                --, effect
+                , effect
                 , tasks
                 , Json.string
                 ]
             )
-        , Inline.html elementsOrString
+        , Inline.html (Just "\n\n") elementsOrString
         ]
 
 
@@ -88,6 +88,33 @@ blockquote =
     ]
         |> Json.oneOf
         |> Json.map (addIndentation "> ")
+
+
+effect : Json.Decoder String
+effect =
+    Json.oneOf
+        [ elementOrString
+            |> Json.field "effect"
+            |> Inline.effect
+            |> Json.map
+                (\( def, body ) ->
+                    "{{"
+                        ++ def
+                        ++ "}}\n"
+                        ++ body
+                )
+        , elementsOrString
+            |> Json.field "effect"
+            |> Inline.effect
+            |> Json.map
+                (\( def, body ) ->
+                    "{{"
+                        ++ def
+                        ++ "}}\n**********************\n\n"
+                        ++ body
+                        ++ "\n\n**********************"
+                )
+        ]
 
 
 table : Json.Decoder String

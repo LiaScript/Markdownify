@@ -104,6 +104,24 @@ json =
       ]
     },
     {
+      "title": "`effect`",
+      "indent": 3,
+      "body": [
+        "An effect can be an animation step or a playback or both things combined:",
+        {
+          "effect": {
+            "begin": 1,
+            "end": 3,
+            "body": "Hallo welt"
+          }
+        },
+        "or",
+        {
+          "horizontal rule": null
+        }
+      ]
+    },
+    {
       "title": "`horizontal rule` or `hr`",
       "indent": 3,
       "body": [

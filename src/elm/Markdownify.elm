@@ -68,11 +68,21 @@ indentation =
 meta : Bool -> Json.Decoder String
 meta large =
     Json.field "meta"
-        (Json.string
+        (Json.oneOf
+            [ Json.string |> Json.map (Tuple.pair True)
+            , Json.list Json.string |> Json.map (String.join "\n" >> Tuple.pair False)
+            ]
             |> Json.dict
             |> Json.map
                 (Dict.toList
-                    >> List.map (\( k, v ) -> k ++ ": " ++ v)
+                    >> List.map
+                        (\( k, ( oneLine, v ) ) ->
+                            if oneLine then
+                                k ++ ": " ++ v
+
+                            else
+                                k ++ "\n" ++ v ++ "\n@end"
+                        )
                     >> String.join "\n\n"
                     >> (\m ->
                             if large then

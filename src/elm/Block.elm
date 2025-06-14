@@ -1,5 +1,6 @@
 module Block exposing (..)
 
+import Html exposing (col, option)
 import Inline
 import Json.Decode as Json
 
@@ -414,6 +415,68 @@ quizType =
                             )
                             Inline.inputOptions
                             Inline.inputSolution
+
+                    "matrix" ->
+                        Json.map2
+                            (\head row ->
+                                let
+                                    header =
+                                        head
+                                            |> List.map
+                                                (\column ->
+                                                    if String.contains ")" column then
+                                                        "[ " ++ column ++ " ]"
+
+                                                    else
+                                                        "( " ++ column ++ " )"
+                                                )
+                                            |> String.join " "
+
+                                    body =
+                                        row
+                                            |> List.map
+                                                (\( isSingleChoice, solution, opt ) ->
+                                                    head
+                                                        |> List.indexedMap
+                                                            (\i _ ->
+                                                                if List.member i solution then
+                                                                    if isSingleChoice then
+                                                                        "(X)"
+
+                                                                    else
+                                                                        "[X]"
+
+                                                                else if isSingleChoice then
+                                                                    "( )"
+
+                                                                else
+                                                                    "[ ]"
+                                                            )
+                                                        |> String.join " "
+                                                        |> (\r -> "[  " ++ r ++ "  ] " ++ opt)
+                                                )
+                                            |> String.join "\n"
+                                in
+                                "[ " ++ header ++ " ]\n" ++ body
+                            )
+                            (Json.field "head" (Json.list (Json.oneOf [ Inline.element, Inline.elementsOrString ])))
+                            (Json.field "rows"
+                                (Json.list
+                                    (Json.oneOf
+                                        [ Json.field "single-choice"
+                                            (Json.map2 (\solution opt -> ( True, solution, opt ))
+                                                Inline.inputSolution
+                                                (Json.field "option" Inline.elementsOrString)
+                                            )
+                                        , Json.field "multiple-choice"
+                                            (Json.map2 (\solution opt -> ( False, solution, opt ))
+                                                Inline.inputSolution
+                                                (Json.field "option" Inline.elementsOrString)
+                                            )
+                                        ]
+                                    )
+                                )
+                            )
 
                     "gap-text" ->
                         Json.field "body" elementOrString

@@ -322,6 +322,57 @@
       ]
     },
     {
+      "title": "`matrix`",
+      "indent": 4,
+      "body": [
+        "What did the fish say, when he hit the wall?",
+        {
+          "quiz": "matrix",
+          "head": [
+            "column 1",
+            "column 2",
+
+            {
+              "bold": [{ "italic": "(this is a bold and italic string)" }]
+            }
+          ],
+          "rows": [
+            {
+              "single-choice": {
+                "solution": 1,
+                "option": "this single choice has only one solution"
+              }
+            },
+            {
+              "single-choice": {
+                "solution": [0, 1, 2],
+                "option": "this single choice has multiples solutions"
+              }
+            },
+            {
+              "single-choice": {
+                "solution": [-1],
+                "option": "this one has no solutions"
+              }
+            },
+            {
+              "multiple-choice": {
+                "solution": [0, 1, 2],
+                "option": "this multiple choice has multiples solutions"
+              }
+            },
+            {
+              "multiple-choice": {
+                "solution": -1,
+                "option": "this multiple choice has no solutions"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
       "title": "`gap-text`",
       "indent": 4,
       "body": [

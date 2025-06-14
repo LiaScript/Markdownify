@@ -388,10 +388,10 @@ quizType =
                                     |> List.indexedMap
                                         (\i option ->
                                             if List.member i solution then
-                                                "- [(X)] " ++ option
+                                                "[(X)] " ++ option
 
                                             else
-                                                "- [( )] " ++ option
+                                                "[( )] " ++ option
                                         )
                                     |> String.join "\n"
                             )
@@ -405,10 +405,10 @@ quizType =
                                     |> List.indexedMap
                                         (\i option ->
                                             if List.member i solution then
-                                                "- [[X]] " ++ option
+                                                "[[X]] " ++ option
 
                                             else
-                                                "- [[ ]] " ++ option
+                                                "[[ ]] " ++ option
                                         )
                                     |> String.join "\n"
                             )
@@ -418,8 +418,11 @@ quizType =
                     "gap-text" ->
                         Json.field "body" elementOrString
 
+                    "generic" ->
+                        Json.succeed "[[!]]\n"
+
                     _ ->
-                        Json.fail "Supported quiz types are \"text\", \"selection\", \"single-choice\", \"multiple-choice\", \"matrix\", and \"gap-text\"."
+                        Json.fail "Supported quiz types are \"text\", \"selection\", \"single-choice\", \"multiple-choice\", \"matrix\", \"gap-text\", and \"generic\"."
             )
 
 

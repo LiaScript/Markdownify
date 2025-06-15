@@ -28,10 +28,8 @@ sections =
 
 body : Json.Decoder String
 body =
-    [ Block.elementsOrString
-    , Block.elementOrString
-        |> Json.list
-        |> Json.map (String.join "\n\n")
+    [ Block.elementOrString
+    , Json.list Block.elementOrString |> Json.map (String.join "\n\n")
     ]
         |> Json.oneOf
         |> Json.field "body"

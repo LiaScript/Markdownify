@@ -1,6 +1,5 @@
 module Block exposing (..)
 
-import Html exposing (blockquote)
 import Inline
 import Json.Decode as Json
 
@@ -28,10 +27,12 @@ elementOrString =
 
 elementsOrString : Json.Decoder String
 elementsOrString =
-    Json.oneOf
-        [ Json.string
-        , elements
-        ]
+    [ Json.string
+    , element
+    ]
+        |> Json.oneOf
+        |> Json.list
+        |> Json.map (String.join "\n\n")
 
 
 elements =
@@ -50,7 +51,15 @@ element =
 
 addAttributes : String -> Json.Decoder String
 addAttributes block =
-    Json.map (\a -> a ++ "\n" ++ block) Inline.toComment
+    Json.map
+        (\a ->
+            if String.isEmpty a then
+                block
+
+            else
+                a ++ "\n" ++ block
+        )
+        Inline.toComment
 
 
 body : Json.Decoder String
@@ -67,7 +76,7 @@ inlines : Json.Decoder String
 inlines =
     [ Inline.stringOrList
     , Inline.element
-    , Json.list Inline.elementsOrString |> Json.map (String.join " ")
+    , Json.list Inline.elementsOrString |> Json.map (String.join "")
     ]
         |> Json.oneOf
 
@@ -116,7 +125,6 @@ typeOf id =
             Json.list (Inline.link True)
                 |> Json.field "body"
                 |> Json.map (String.join "\n")
-                |> Json.field "gallery"
                 |> Json.andThen addAttributes
 
         "formula" ->
@@ -140,590 +148,505 @@ typeOf id =
                 , elementOrString
                     |> Json.list
                     |> Json.field "body"
-                    |> Json.map (String.join "\n\n")
-                    |> Inline.effect
-                    |> Json.map
-                        (\( def, content ) ->
-                            "{{"
-                                ++ def
-                                ++ "}}\n**********************\n\n"
-                                ++ content
-                                ++ "\n\n**********************"
+                    |> Json.andThen
+                        (\blocks ->
+                            case blocks of
+                                [] ->
+                                    Json.fail "An effect must have at least one block."
+
+                                [ block ] ->
+                                    block
+                                        |> Json.succeed
+                                        |> Inline.effect
+                                        |> Json.map
+                                            (\( def, content ) ->
+                                                "{{"
+                                                    ++ def
+                                                    ++ "}}\n"
+                                                    ++ content
+                                            )
+
+                                _ ->
+                                    blocks
+                                        |> String.join "\n\n"
+                                        |> Json.succeed
+                                        |> Inline.effect
+                                        |> Json.map
+                                            (\( def, content ) ->
+                                                "{{"
+                                                    ++ def
+                                                    ++ "}}\n**********************\n\n"
+                                                    ++ content
+                                                    ++ "\n\n**********************"
+                                            )
                         )
                 ]
                 |> Json.andThen addAttributes
 
-        "blockquote" ->
-            blockquote
+        "quote" ->
+            quote
                 |> Json.andThen addAttributes
 
+        "html" ->
+            Inline.html (Just "\n\n") body
+
+        "ascii" ->
+            asciiArt |> Json.andThen addAttributes
+
+        "chart" ->
+            chart |> Json.andThen addAttributes
+
+        "table" ->
+            table |> Json.andThen addAttributes
+
+        "itemize" ->
+            unorderedList |> Json.andThen addAttributes
+
+        "enumerate" ->
+            orderedList |> Json.andThen addAttributes
+
+        "code" ->
+            Json.map2
+                (\c e ->
+                    if String.isEmpty e then
+                        c
+
+                    else
+                        c ++ "\n" ++ e
+                )
+                code
+                execute
+                |> Json.andThen addAttributes
+
+        "project" ->
+            project |> Json.andThen addAttributes
+
+        "tasks" ->
+            tasks |> Json.andThen addAttributes
+
+        "quiz" ->
+            quiz |> Json.andThen addAttributes
+
         _ ->
-            Json.fail <| "unknown block type: " ++ id
+            Inline.element
 
 
-blockquote : Json.Decoder String
-blockquote =
-    [ Json.field "body" elementOrString
-    , Json.field "body" elementsOrString
-    ]
-        |> Json.oneOf
-        |> Json.map (addIndentation "> ")
+addIndentation : String -> String -> String
+addIndentation indent md =
+    md
+        |> String.lines
+        |> List.map (\l -> indent ++ l)
+        |> String.join "\n"
 
 
+quote : Json.Decoder String
+quote =
+    Json.map2
+        (\quote_ by_ ->
+            addIndentation "> " <|
+                case by_ of
+                    Nothing ->
+                        quote_
 
-{- Json.oneOf
-   [ Json.map2
-       (\attr elem ->
-           (if String.isEmpty attr then
-               ""
-
-            else
-               attr ++ "\n"
-           )
-               ++ elem
-       )
-       Inline.toComment
-       (Json.oneOf
-           [ paragraph
-           , horizontalRule
-           , blockquote
-           , comment
-           , unorderedList
-           , orderedList
-           , assciiArt
-           , chart
-           , citation
-           , quiz
-           , gallery
-           , formula
-           , table
-           , code
-           , project
-
-           --, survey
-           , effect
-           , tasks
-           , Json.string
-           ]
-       )
-   , Inline.html (Just "\n\n") elementsOrString
-   ]
--}
-{- , blockquote
-   formula : Json.Decoder String
-   formula =
-       Inline.stringOrList
-           |> Json.field "formula"
-           |> Json.map (\f -> "$$ " ++ f ++ " $$")
+                    Just author ->
+                        quote_ ++ "\n\n-- " ++ author
+        )
+        (Json.field "body"
+            (Json.oneOf
+                [ elementsOrString
+                , elementOrString
+                ]
+            )
+        )
+        (Json.field "by" elementOrString |> Json.maybe)
 
 
-   blockquote : Json.Decoder String
-   blockquote =
-       [ Json.field "blockquote" elementsOrString
-       , Json.field "q" elementsOrString
-       ]
-           |> Json.oneOf
-           |> Json.map (addIndentation "> ")
+asciiArt : Json.Decoder String
+asciiArt =
+    Json.map2
+        (\image title_ ->
+            "``` ascii"
+                ++ title_
+                ++ "\n"
+                ++ image
+                ++ "\n```"
+        )
+        (Json.field "body" Inline.stringOrList)
+        (Inline.elementsOrString
+            |> Json.field "title"
+            |> Json.maybe
+            |> Json.map (Maybe.map ((++) "  ") >> Maybe.withDefault "")
+        )
 
 
-   effect : Json.Decoder String
-   effect =
-       Json.oneOf
-           [ elementOrString
-               |> Json.field "effect"
-               |> Inline.effect
-               |> Json.map
-                   (\( def, body ) ->
-                       "{{"
-                           ++ def
-                           ++ "}}\n"
-                           ++ body
-                   )
-           , elementsOrString
-               |> Json.field "effect"
-               |> Inline.effect
-               |> Json.map
-                   (\( def, body ) ->
-                       "{{"
-                           ++ def
-                           ++ "}}\n**********************\n\n"
-                           ++ body
-                           ++ "\n\n**********************"
-                   )
-           ]
+chart : Json.Decoder String
+chart =
+    Inline.stringOrList
+        |> Json.field "body"
+        |> Json.map (addIndentation "    ")
 
 
-   table : Json.Decoder String
-   table =
-       Json.field "table"
-           (Json.map3
-               (\head orientation rows ->
-                   let
-                       orient =
-                           orientation
-                               |> Maybe.map
-                                   (List.map
-                                       (\o ->
-                                           case o of
-                                               "left" ->
-                                                   ":----"
+table : Json.Decoder String
+table =
+    Json.map3
+        (\head orientation rows ->
+            let
+                orient =
+                    orientation
+                        |> Maybe.map
+                            (List.map
+                                (\o ->
+                                    case o of
+                                        "left" ->
+                                            ":----"
 
-                                               "right" ->
-                                                   "----:"
+                                        "right" ->
+                                            "----:"
 
-                                               "center" ->
-                                                   ":---:"
+                                        "center" ->
+                                            ":---:"
 
-                                               _ ->
-                                                   "-----"
-                                       )
-                                   )
-                               |> Maybe.withDefault
-                                   (List.repeat
-                                       (List.length head)
-                                       "-----"
-                                   )
-                   in
-                   rows
-                       |> List.map (String.join " | ")
-                       |> (++) [ String.join " | " orient ]
-                       |> (++) [ String.join " | " head ]
-                       |> List.map (\r -> "| " ++ r ++ " |")
-                       |> String.join "\n"
-               )
-               (Json.list Inline.elementsOrString
-                   |> Json.field "head"
-               )
-               (Json.list Json.string
-                   |> Json.field "orientation"
-                   |> Json.maybe
-               )
-               (Json.list Inline.elementsOrString
-                   |> Json.list
-                   |> Json.field "rows"
-               )
-           )
+                                        _ ->
+                                            "-----"
+                                )
+                            )
+                        |> Maybe.withDefault
+                            (List.repeat
+                                (List.length head)
+                                "-----"
+                            )
+            in
+            rows
+                |> List.map (String.join " | ")
+                |> (++) [ String.join " | " orient ]
+                |> (++) [ String.join " | " head ]
+                |> List.map (\r -> "| " ++ r ++ " |")
+                |> String.join "\n"
+        )
+        (Json.list Inline.elementsOrString
+            |> Json.field "head"
+        )
+        (Json.list Json.string
+            |> Json.field "orientation"
+            |> Json.maybe
+        )
+        (Json.list Inline.elementsOrString
+            |> Json.list
+            |> Json.field "body"
+        )
 
 
-   citation : Json.Decoder String
-   citation =
-       Json.map2
-           (\quote by -> quote ++ "\n\n-- " ++ by)
-           (Json.oneOf
-               [ Json.field "citation" elementsOrString
-               , Json.field "cite" elementsOrString
-               ]
-           )
-           (Json.field "by" Inline.elementsOrString)
-           |> Json.map (addIndentation "> ")
+unorderedList : Json.Decoder String
+unorderedList =
+    Json.field "body"
+        ([ Json.list elementOrString
+            |> Json.map (String.join "\n\n")
+         , elementOrString
+         ]
+            |> Json.oneOf
+            |> Json.list
+        )
+        |> Json.map
+            (List.map
+                (String.lines
+                    >> List.indexedMap
+                        (\i l ->
+                            if i == 0 then
+                                "* " ++ l
+
+                            else
+                                "  " ++ l
+                        )
+                    >> String.join "\n"
+                )
+                >> String.join "\n\n"
+            )
 
 
-   paragraph : Json.Decoder String
-   paragraph =
-       Json.oneOf
-           [ Json.field "paragraph" Inline.elementsOrString
-           , Json.field "p" Inline.elementsOrString
-           ]
+orderedList : Json.Decoder String
+orderedList =
+    Json.field "body"
+        ([ Json.list elementOrString
+            |> Json.map (String.join "\n\n")
+         , elementOrString
+         ]
+            |> Json.oneOf
+            |> Json.list
+        )
+        |> Json.map
+            (List.indexedMap
+                (\id ->
+                    String.lines
+                        >> List.indexedMap
+                            (\i l ->
+                                if i == 0 then
+                                    String.fromInt (id + 1) ++ ". " ++ l
+
+                                else
+                                    "   " ++ l
+                            )
+                        >> String.join "\n"
+                )
+                >> String.join "\n\n"
+            )
 
 
-   horizontalRule : Json.Decoder String
-   horizontalRule =
-       [ Json.field "horizontal rule" (Json.succeed "---")
-       , Json.field "hr" (Json.succeed "---")
-       ]
-           |> Json.oneOf
+code : Json.Decoder String
+code =
+    Json.map4
+        (\c lang title closed ->
+            case ( lang, title, closed ) of
+                ( Just l, Nothing, _ ) ->
+                    "``` "
+                        ++ l
+                        ++ "\n"
+                        ++ c
+                        ++ "\n```"
 
+                ( Just l, Just t, Nothing ) ->
+                    "``` "
+                        ++ l
+                        ++ "   "
+                        ++ t
+                        ++ "\n"
+                        ++ c
+                        ++ "\n```"
 
-   list : Json.Decoder (List String)
-   list =
-       Json.list (Json.oneOf [ elementOrString, elementsOrString ])
+                ( Just l, Just t, Just no ) ->
+                    "``` "
+                        ++ l
+                        ++ "   "
+                        ++ (if no then
+                                "-"
 
-
-   unorderedList : Json.Decoder String
-   unorderedList =
-       [ Json.field "unordered list" list
-       , Json.field "ul" list
-       ]
-           |> Json.oneOf
-           |> Json.map
-               (List.map
-                   (String.lines
-                       >> List.indexedMap
-                           (\i l ->
-                               if i == 0 then
-                                   "* " ++ l
-
-                               else
-                                   "  " ++ l
+                            else
+                                "+"
                            )
-                       >> String.join "\n"
-                   )
-                   >> String.join "\n\n"
-               )
+                        ++ t
+                        ++ "\n"
+                        ++ c
+                        ++ "\n```"
+
+                _ ->
+                    "```\n" ++ c ++ "\n```"
+        )
+        (Inline.stringOrList
+            |> Json.field "body"
+        )
+        (Json.string
+            |> Json.field "language"
+            |> Json.maybe
+        )
+        (Json.string
+            |> Json.field "title"
+            |> Json.maybe
+        )
+        (Json.bool
+            |> Json.field "closed"
+            |> Json.maybe
+        )
 
 
-   orderedList : Json.Decoder String
-   orderedList =
-       [ Json.field "ordered list" list
-       , Json.field "ol" list
-       ]
-           |> Json.oneOf
-           |> Json.map
-               (List.indexedMap
-                   (\id ->
-                       String.lines
-                           >> List.indexedMap
-                               (\i l ->
-                                   if i == 0 then
-                                       String.fromInt (id + 1) ++ ". " ++ l
-
-                                   else
-                                       "   " ++ l
-                               )
-                           >> String.join "\n"
-                   )
-                   >> String.join "\n\n"
-               )
+project : Json.Decoder String
+project =
+    Json.map2
+        (\files append ->
+            String.join "\n" files ++ append
+        )
+        (Json.list code
+            |> Json.field "body"
+        )
+        execute
 
 
-   comment : Json.Decoder String
-   comment =
-       Json.map3 (\id str voice -> "    --{{" ++ String.fromInt id ++ voice ++ "}}--\n" ++ str)
-           (Json.field "id" Json.int)
-           (Json.field "comment" Inline.elementsOrString)
-           (Json.field "voice" Json.string
-               |> Json.maybe
-               |> Json.map (Maybe.map ((++) " ") >> Maybe.withDefault "")
-           )
+execute : Json.Decoder String
+execute =
+    Inline.stringOrList
+        |> Json.field "execute"
+        |> Json.map (\s -> "\n" ++ s)
+        |> Json.maybe
+        |> Json.map (Maybe.withDefault "")
 
 
-   addIndentation : String -> String -> String
-   addIndentation indent md =
-       md
-           |> String.lines
-           |> List.map (\l -> indent ++ l)
-           |> String.join "\n"
+tasks : Json.Decoder String
+tasks =
+    Json.map3
+        (\task done append ->
+            (task
+                |> List.indexedMap
+                    (\i t ->
+                        if List.member i done then
+                            "- [X] " ++ t
+
+                        else
+                            "- [ ] " ++ t
+                    )
+                |> String.join "\n"
+            )
+                ++ append
+        )
+        (Json.field "body" (Json.list Inline.elementsOrString))
+        (Inline.marked
+            |> Json.field "done"
+            |> Json.maybe
+            |> Json.map (Maybe.withDefault [])
+        )
+        execute
 
 
-   elements : Json.Decoder String
-   elements =
-       Json.lazy (\_ -> Json.list element)
-           |> Json.map (String.join "\n\n")
+quiz : Json.Decoder String
+quiz =
+    Json.map4
+        (\q hints answer append ->
+            case hints of
+                Nothing ->
+                    q ++ answer ++ append
+
+                Just h ->
+                    q ++ h ++ answer ++ append
+        )
+        quizType
+        quizHints
+        quizAnswer
+        execute
 
 
-   assciiArt : Json.Decoder String
-   assciiArt =
-       Json.map2
-           (\image title_ ->
-               "``` ascii"
-                   ++ title_
-                   ++ "\n"
-                   ++ image
-                   ++ "\n```"
-           )
-           ([ Json.field "ascii art" Inline.stringOrList
-            , Json.field "ascii" Inline.stringOrList
-            ]
-               |> Json.oneOf
-           )
-           (Inline.elementsOrString
-               |> Json.field "title"
-               |> Json.maybe
-               |> Json.map (Maybe.map ((++) "  ") >> Maybe.withDefault "")
-           )
+quizType : Json.Decoder String
+quizType =
+    Json.field "quizType" Json.string
+        |> Json.andThen
+            (\type_ ->
+                case type_ of
+                    "input" ->
+                        Inline.inputText
+                            |> Json.map (\i -> "[[" ++ i ++ "]]\n")
+
+                    "selection" ->
+                        Inline.inputSelection
+                            |> Json.map (\i -> "[[" ++ i ++ "]]\n")
+
+                    "single-choice" ->
+                        Json.map2
+                            (\options solution ->
+                                (options
+                                    |> List.indexedMap
+                                        (\i option ->
+                                            if List.member i solution then
+                                                "[(X)] " ++ option
+
+                                            else
+                                                "[( )] " ++ option
+                                        )
+                                    |> String.join "\n"
+                                )
+                                    ++ "\n"
+                            )
+                            Inline.inputOptions
+                            (Json.field "solution" Inline.marked)
+
+                    "multiple-choice" ->
+                        Json.map2
+                            (\options solution ->
+                                (options
+                                    |> List.indexedMap
+                                        (\i option ->
+                                            if List.member i solution then
+                                                "[[X]] " ++ option
+
+                                            else
+                                                "[[ ]] " ++ option
+                                        )
+                                    |> String.join "\n"
+                                )
+                                    ++ "\n"
+                            )
+                            Inline.inputOptions
+                            (Json.field "solution" Inline.marked)
+
+                    "matrix" ->
+                        Json.map2
+                            (\head row ->
+                                let
+                                    header =
+                                        head
+                                            |> List.map
+                                                (\column ->
+                                                    if String.contains ")" column then
+                                                        "[ " ++ column ++ " ]"
+
+                                                    else
+                                                        "( " ++ column ++ " )"
+                                                )
+                                            |> String.join " "
+
+                                    body_ =
+                                        row
+                                            |> List.map
+                                                (\( isSingleChoice, solution, opt ) ->
+                                                    head
+                                                        |> List.indexedMap
+                                                            (\i _ ->
+                                                                if List.member i solution then
+                                                                    if isSingleChoice then
+                                                                        "(X)"
+
+                                                                    else
+                                                                        "[X]"
+
+                                                                else if isSingleChoice then
+                                                                    "( )"
+
+                                                                else
+                                                                    "[ ]"
+                                                            )
+                                                        |> String.join " "
+                                                        |> (\r -> "[  " ++ r ++ "  ] " ++ opt)
+                                                )
+                                            |> String.join "\n"
+                                in
+                                "[ " ++ header ++ " ]\n" ++ body_ ++ "\n"
+                            )
+                            (Json.field "head" (Json.list (Json.oneOf [ Inline.element, Inline.elementsOrString ])))
+                            (Json.field "body"
+                                (Json.list
+                                    (Json.oneOf
+                                        [ Json.field "single-choice"
+                                            (Json.map2 (\solution opt -> ( True, solution, opt ))
+                                                (Json.field "solution" Inline.marked)
+                                                (Json.field "body" Inline.elementsOrString)
+                                            )
+                                        , Json.field "multiple-choice"
+                                            (Json.map2 (\solution opt -> ( False, solution, opt ))
+                                                (Json.field "solution" Inline.marked)
+                                                (Json.field "body" Inline.elementsOrString)
+                                            )
+                                        ]
+                                    )
+                                )
+                            )
+
+                    "gap-text" ->
+                        Json.field "body" elementOrString
+
+                    "generic" ->
+                        Json.succeed "[[!]]\n"
+
+                    _ ->
+                        Json.fail "Supported quiz types are \"input\", \"selection\", \"single-choice\", \"multiple-choice\", \"matrix\", \"gap-text\", and \"generic\"."
+            )
 
 
-   chart : Json.Decoder String
-   chart =
-       [ Json.field "chart" Inline.stringOrList
-       , Json.field "diagram" Inline.stringOrList
-       ]
-           |> Json.oneOf
-           |> Json.map
-               (String.lines
-                   >> List.map ((++) "    ")
-                   >> String.join "\n"
-               )
+quizHints : Json.Decoder (Maybe String)
+quizHints =
+    Json.list Inline.elementsOrString
+        |> Json.map (List.map ((++) "[[?]] ") >> String.join "\n")
+        |> Json.field "hints"
+        |> Json.maybe
 
 
-   tasks : Json.Decoder String
-   tasks =
-       Json.map3
-           (\task done append ->
-               (task
-                   |> List.indexedMap
-                       (\i t ->
-                           if List.member i done then
-                               "- [X] " ++ t
-
-                           else
-                               "- [ ] " ++ t
-                       )
-                   |> String.join "\n"
-               )
-                   ++ append
-           )
-           (Json.field "tasks" (Json.list elementsOrString))
-           ([ Json.list Json.int
-            , Json.list Json.bool
-               |> Json.map
-                   (List.indexedMap Tuple.pair
-                       >> List.filterMap
-                           (\( i, b ) ->
-                               if b then
-                                   Just i
-
-                               else
-                                   Nothing
-                           )
-                   )
-            ]
-               |> Json.oneOf
-               |> Json.field "done"
-               |> Json.maybe
-               |> Json.map (Maybe.withDefault [])
-           )
-           appendix
-
-
-   quiz : Json.Decoder String
-   quiz =
-       Json.map4
-           (\q hints answer append ->
-               case hints of
-                   Nothing ->
-                       q ++ answer ++ append
-
-                   Just h ->
-                       q ++ "\n" ++ h ++ answer ++ append
-           )
-           quizType
-           quizHints
-           quizAnswer
-           appendix
-
-
-   quizType : Json.Decoder String
-   quizType =
-       Json.field "quiz" Json.string
-           |> Json.andThen
-               (\type_ ->
-                   case type_ of
-                       "text" ->
-                           Inline.inputText
-                               |> Json.map (\s -> "[[" ++ s ++ "]]")
-
-                       "selection" ->
-                           Inline.inputSelection
-                               |> Json.map (\s -> "[[" ++ s ++ "]]")
-
-                       "single-choice" ->
-                           Json.map2
-                               (\options solution ->
-                                   options
-                                       |> List.indexedMap
-                                           (\i option ->
-                                               if List.member i solution then
-                                                   "[(X)] " ++ option
-
-                                               else
-                                                   "[( )] " ++ option
-                                           )
-                                       |> String.join "\n"
-                               )
-                               Inline.inputOptions
-                               Inline.inputSolution
-
-                       "multiple-choice" ->
-                           Json.map2
-                               (\options solution ->
-                                   options
-                                       |> List.indexedMap
-                                           (\i option ->
-                                               if List.member i solution then
-                                                   "[[X]] " ++ option
-
-                                               else
-                                                   "[[ ]] " ++ option
-                                           )
-                                       |> String.join "\n"
-                               )
-                               Inline.inputOptions
-                               Inline.inputSolution
-
-                       "matrix" ->
-                           Json.map2
-                               (\head row ->
-                                   let
-                                       header =
-                                           head
-                                               |> List.map
-                                                   (\column ->
-                                                       if String.contains ")" column then
-                                                           "[ " ++ column ++ " ]"
-
-                                                       else
-                                                           "( " ++ column ++ " )"
-                                                   )
-                                               |> String.join " "
-
-                                       body =
-                                           row
-                                               |> List.map
-                                                   (\( isSingleChoice, solution, opt ) ->
-                                                       head
-                                                           |> List.indexedMap
-                                                               (\i _ ->
-                                                                   if List.member i solution then
-                                                                       if isSingleChoice then
-                                                                           "(X)"
-
-                                                                       else
-                                                                           "[X]"
-
-                                                                   else if isSingleChoice then
-                                                                       "( )"
-
-                                                                   else
-                                                                       "[ ]"
-                                                               )
-                                                           |> String.join " "
-                                                           |> (\r -> "[  " ++ r ++ "  ] " ++ opt)
-                                                   )
-                                               |> String.join "\n"
-                                   in
-                                   "[ " ++ header ++ " ]\n" ++ body
-                               )
-                               (Json.field "head" (Json.list (Json.oneOf [ Inline.element, Inline.elementsOrString ])))
-                               (Json.field "rows"
-                                   (Json.list
-                                       (Json.oneOf
-                                           [ Json.field "single-choice"
-                                               (Json.map2 (\solution opt -> ( True, solution, opt ))
-                                                   Inline.inputSolution
-                                                   (Json.field "option" Inline.elementsOrString)
-                                               )
-                                           , Json.field "multiple-choice"
-                                               (Json.map2 (\solution opt -> ( False, solution, opt ))
-                                                   Inline.inputSolution
-                                                   (Json.field "option" Inline.elementsOrString)
-                                               )
-                                           ]
-                                       )
-                                   )
-                               )
-
-                       "gap-text" ->
-                           Json.field "body" elementOrString
-
-                       "generic" ->
-                           Json.succeed "[[!]]\n"
-
-                       _ ->
-                           Json.fail "Supported quiz types are \"text\", \"selection\", \"single-choice\", \"multiple-choice\", \"matrix\", \"gap-text\", and \"generic\"."
-               )
-
-
-   quizHints : Json.Decoder (Maybe String)
-   quizHints =
-       Json.list Inline.elementsOrString
-           |> Json.map (List.map ((++) "[[?]] ") >> String.join "\n")
-           |> Json.field "hints"
-           |> Json.maybe
-
-
-   quizAnswer : Json.Decoder String
-   quizAnswer =
-       Json.field "answer" elementsOrString
-           |> Json.map (\s -> "\n************************\n\n" ++ s ++ "\n\n************************")
-           |> Json.maybe
-           |> Json.map (Maybe.withDefault "")
-
-
-   gallery : Json.Decoder String
-   gallery =
-       Json.list Inline.link
-           |> Json.map (String.join "\n")
-           |> Json.field "gallery"
-
-
-   project : Json.Decoder String
-   project =
-       Json.map2
-           (\files append ->
-               String.join "\n" files ++ append
-           )
-           ([ Json.list code
-            , Json.map List.singleton code
-            ]
-               |> Json.oneOf
-               |> Json.field "project"
-           )
-           appendix
-
-
-   code : Json.Decoder String
-   code =
-       Json.map5
-           (\c lang title closed attr ->
-               case ( lang, title, closed ) of
-                   ( Just l, Nothing, _ ) ->
-                       "``` "
-                           ++ l
-                           ++ "\n"
-                           ++ c
-                           ++ "\n```"
-
-                   ( Just l, Just t, Nothing ) ->
-                       "``` "
-                           ++ l
-                           ++ "   "
-                           ++ t
-                           ++ "\n"
-                           ++ c
-                           ++ "\n```"
-
-                   ( Just l, Just t, Just no ) ->
-                       "``` "
-                           ++ l
-                           ++ "   "
-                           ++ (if no then
-                                   "-"
-
-                               else
-                                   "+"
-                              )
-                           ++ t
-                           ++ "\n"
-                           ++ c
-                           ++ "\n```"
-
-                   _ ->
-                       "```\n" ++ c ++ "\n```"
-           )
-           (Inline.stringOrList
-               |> Json.field "code"
-           )
-           (Json.string
-               |> Json.field "language"
-               |> Json.maybe
-           )
-           (Json.string
-               |> Json.field "name"
-               |> Json.maybe
-           )
-           (Json.bool
-               |> Json.field "closed"
-               |> Json.maybe
-           )
-           Inline.attributes
-
-
-   appendix : Json.Decoder String
-   appendix =
-       Inline.stringOrList
-           |> Json.field "appendix"
-           |> Json.map (\s -> "\n" ++ s)
-           |> Json.maybe
-           |> Json.map (Maybe.withDefault "")
--}
+quizAnswer : Json.Decoder String
+quizAnswer =
+    Json.field "answer" (Json.oneOf [ elementsOrString, elementOrString ])
+        |> Json.map (\s -> "\n************************\n\n" ++ s ++ "\n\n************************")
+        |> Json.maybe
+        |> Json.map (Maybe.withDefault "")

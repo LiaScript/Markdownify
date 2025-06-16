@@ -44,7 +44,7 @@ elementOrString =
 elementsOrString : Decoder String
 elementsOrString =
     oneOf
-        [ list element |> map (String.join " ")
+        [ list elementOrString |> map (String.join " ")
         , elementOrString
         ]
 
@@ -58,7 +58,7 @@ element =
 body : Decoder String
 body =
     [ element
-    , list element |> map (String.join "\n")
+    , list (oneOf [ element, string ]) |> map (String.join "")
     , stringOrList
     ]
         |> oneOf
@@ -122,7 +122,7 @@ typeOf id =
                 |> andThen addAttributes
 
         "html" ->
-            html__ Nothing body
+            html Nothing body
 
         "link" ->
             link False
@@ -222,7 +222,7 @@ inputText =
                             fail "length must be greater than or equal to the length of the solution"
 
                         else
-                            succeed (solution ++ String.repeat l " ")
+                            succeed (solution ++ String.repeat (l - String.length solution) " ")
             )
 
 
@@ -242,13 +242,26 @@ inputSelection =
                 |> String.join " | "
         )
         inputOptions
-        (field "solution"
-            (oneOf
-                [ list int
-                , map List.singleton int
-                ]
+        (field "solution" marked)
+
+
+marked =
+    [ int |> map List.singleton
+    , list int
+    , list bool
+        |> map
+            (List.indexedMap Tuple.pair
+                >> List.filterMap
+                    (\( i, b ) ->
+                        if b then
+                            Just i
+
+                        else
+                            Nothing
+                    )
             )
-        )
+    ]
+        |> oneOf
 
 
 inputOptions : Decoder (List String)
@@ -288,20 +301,20 @@ link multimedia =
                     )
             )
         )
-        (field "alt" body
+        (field "alt" elementsOrString
             |> maybe
             |> map (Maybe.withDefault "")
         )
         (field "url" string)
-        (field "title" body
+        (field "title" elementsOrString
             |> maybe
             |> map (Maybe.map (\s -> " \"" ++ s ++ "\"") >> Maybe.withDefault "")
         )
         |> andThen addAttributes
 
 
-html__ : Maybe String -> Decoder String -> Decoder String
-html__ separator decoder =
+html : Maybe String -> Decoder String -> Decoder String
+html separator decoder =
     map3
         (\tag body_ attr ->
             "<"

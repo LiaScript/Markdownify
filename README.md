@@ -1748,3 +1748,129 @@ Script Execution Settings
    - Default: `text/javascript`
    - Options: `python`, `ruby`, etc.
    - Example: `{"type":"text/python"}`
+
+## Metadata
+
+
+### Basic Information
+
+- author: Define course authors (separate multiple with semicolons)
+
+- comment: Short course description for home screen (single paragraph)
+
+- date: Last update timestamp
+
+- email: Contact information
+
+- edit: Link to edit source (GitHub/LiveEditor)
+
+- logo: Background image for course card
+
+- icon: Custom icon replacing default hummingbird
+
+- version: Course versioning (major.minor.patch)
+
+### Attribution & Source
+
+- attribute: Credit third-party resources/libraries
+
+- repository: Original source repository link
+
+### Internationalization
+
+- language: Set UI language (e.g., "en", "de")
+- translation: Links to translated versions
+- font: Custom font families for special characters
+- narrator: Default text-to-speech voice for comments and effects
+
+  Use the following table to select a voice for your course:
+
+  | Female                        | Male                        |
+  | ----------------------------- | --------------------------- |
+  | UK English Female             | UK English Male             |
+  | US English Female             | US English Male             |
+  |                               | Afrikaans Male              |
+  |                               | Albanian Male               |
+  | Arabic Female                 | Arabic Male                 |
+  |                               | Armenian Male               |
+  | Australian Female             | Australian Male             |
+  | Bangla Bangladesh Female      | Bangla Bangladesh Male      |
+  | Bangla India Female           | Bangla India Male           |
+  |                               | Bosnian Male                |
+  | Brazilian Portuguese Female   | Brazilian Portuguese Male   |
+  |                               | Catalan Male                |
+  | Chinese Female                | Chinese Male                |
+  | Chinese (Hong Kong) Female    | Chinese (Hong Kong) Male    |
+  | Chinese Taiwan Female         | Chinese Taiwan Male         |
+  |                               | Croatian Male               |
+  | Czech Female                  | Czech Male                  |
+  | Danish Female                 | Danish Male                 |
+  | Deutsch Female                | Deutsch Male                |
+  | Dutch Female                  | Dutch Male                  |
+  |                               | Esperanto Male              |
+  |                               | Estonian Male               |
+  | Filipino Female               |                             |
+  | Finnish Female                | Finnish Male                |
+  | French Canadian Female        | French Canadian Male        |
+  | French Female                 | French Male                 |
+  | Greek Female                  | Greek Male                  |
+  | Hindi Female                  | Hindi Male                  |
+  | Hungarian Female              | Hungarian Male              |
+  |                               | Icelandic Male              |
+  | Indonesian Female             | Indonesian Male             |
+  | Italian Female                | Italian Male                |
+  | Japanese Female               | Japanese Male               |
+  | Korean Female                 | Korean Male                 |
+  | Latin Female                  | Latin Male                  |
+  |                               | Latvian Male                |
+  |                               | Macedonian Male             |
+  | Moldavian Female              | Moldavian Male              |
+  |                               | Montenegrin Male            |
+  | Nepali                        | Nepali                      |
+  | Norwegian Female              | Norwegian Male              |
+  | Polish Female                 | Polish Male                 |
+  | Portuguese Female             | Portuguese Male             |
+  | Romanian Female               | Romanian Male               |
+  | Russian Female                | Russian Male                |
+  |                               | Serbian Male                |
+  |                               | Serbo-Croatian Male         |
+  | Sinhala                       | Sinhala                     |
+  | Slovak Female                 | Slovak Male                 |
+  | Spanish Female                | Spanish Male                |
+  | Spanish Latin American Female | Spanish Latin American Male |
+  |                               | Swahili Male                |
+  | Swedish Female                | Swedish Male                |
+  | Tamil Female                  | Tamil Male                  |
+  | Thai Female                   | Thai Male                   |
+  | Turkish Female                | Turkish Male                |
+  | Ukrainian Female              |                             |
+  | Vietnamese Female             | Vietnamese Male             |
+  |                               | Welsh Male                  |
+
+
+### External Resources
+
+- link: Load external CSS files
+- script: Load external JavaScript files
+- import: Import macros from other LiaScript courses
+
+### Display Settings
+
+- mode: Default view (Presentation/Slides/Textbook)
+- dark: Default theme preference (true/false)
+- classroom: Enable/disable classroom features
+- sharing: Enable/disable sharing options
+- translateWithGoogle: Enable/disable Google Translate
+
+### Functional Settings
+
+- onload: JavaScript executed before course loads
+- style: Custom CSS definitions
+- persistent: Keep DOM elements across slides
+
+### Helper Functions
+
+- uid: Generate unique identifiers
+- formula: Define KaTeX formula macros
+- input: Access user input in scripts
+- output: Define default output for code blocks

@@ -418,7 +418,7 @@ attributes =
         |> dict
         |> map
             (Dict.toList
-                >> List.map (\( k, v ) -> "\"" ++ k ++ "\"=\"" ++ v ++ "\"")
+                >> List.map (\( k, v ) -> k ++ "=\"" ++ v ++ "\"")
                 >> String.join " "
             )
     ]

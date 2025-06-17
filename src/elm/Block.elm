@@ -29,6 +29,7 @@ elementsOrString : Json.Decoder String
 elementsOrString =
     [ Json.string
     , element
+    , inlines
     ]
         |> Json.oneOf
         |> Json.list

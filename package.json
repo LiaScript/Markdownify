@@ -1,6 +1,6 @@
 {
   "name": "@liascript/markdownify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create LiaScript documents from a common JSON-model",
   "module": "dist/lib.js",
   "types": "dist/lib.d.ts",

@@ -94,8 +94,8 @@ typeOf id =
                 |> andThen addAttributes
 
         "footnote" ->
-            body
-                |> map (\s -> "[^" ++ s ++ "]")
+            string
+                |> map (\key -> "[^" ++ key ++ "]")
                 |> andThen addAttributes
 
         "html" ->
@@ -248,7 +248,14 @@ inputOptions =
 
 link : Bool -> Decoder String
 link multimedia =
-    map4 (\link_ alt_ url_ title_ -> link_ ++ "[" ++ alt_ ++ "](" ++ url_ ++ title_ ++ ")")
+    map4
+        (\link_ alt_ url_ title_ ->
+            if String.isEmpty link_ && String.isEmpty alt_ then
+                url_
+
+            else
+                link_ ++ "[" ++ alt_ ++ "](" ++ url_ ++ title_ ++ ")"
+        )
         (field "linkType"
             (string
                 |> andThen

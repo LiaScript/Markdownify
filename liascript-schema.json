@@ -1,0 +1,509 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LiaScript Document",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "author": { "type": "string" },
+        "email": { "type": "string" },
+        "language": { "type": "string" },
+        "mode": { "type": "string" },
+        "dark": { "type": "boolean" },
+        "narrator": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "sections": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/section" }
+    }
+  },
+  "required": ["sections"],
+  "definitions": {
+    "section": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "indent": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "body": { "$ref": "#/definitions/blockOrStringArray" },
+        "meta": { "type": "object" }
+      },
+      "required": ["title", "indent", "body"]
+    },
+    "blockOrStringArray": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/block" }]
+          }
+        }
+      ]
+    },
+    "block": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "body": {},
+        "attr": { "type": "object" }
+      },
+      "required": ["type"],
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "paragraph" } } },
+          "then": {
+            "properties": { "body": { "$ref": "#/definitions/inlines" } }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "itemize" } } },
+          "then": {
+            "properties": {
+              "body": { "$ref": "#/definitions/blockOrStringArray" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "enumerate" } } },
+          "then": {
+            "properties": {
+              "body": { "$ref": "#/definitions/blockOrStringArray" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "quote" } } },
+          "then": {
+            "properties": {
+              "body": { "$ref": "#/definitions/blockOrStringArray" },
+              "by": { "$ref": "#/definitions/inlines" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "comment" } } },
+          "then": {
+            "properties": {
+              "body": { "$ref": "#/definitions/inlines" },
+              "start": { "type": "integer" },
+              "voice": { "type": "string" }
+            },
+            "required": ["body", "start"]
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "effect" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "oneOf": [
+                  { "$ref": "#/definitions/block" },
+                  {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/block" }
+                  }
+                ]
+              },
+              "start": { "type": "integer" },
+              "stop": { "type": "integer" },
+              "playback": { "type": "boolean" },
+              "voice": { "type": "string" }
+            },
+            "required": ["body", "start"]
+          }
+        }
+      ]
+    },
+    "Inlines": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Inline" }
+        },
+        { "$ref": "#/definitions/Inline" }
+      ]
+    },
+    "Inline": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "body": {},
+        "attr": { "type": "object" }
+      },
+      "required": ["type"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "bold" }
+            }
+          },
+          "then": {
+            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
+          },
+          "description": "Displays the contained elements in bold text. --> __bold text__"
+        },
+        {
+          "if": { "properties": { "type": { "const": "italic" } } },
+          "then": {
+            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
+          },
+          "description": "Displays the contained elements in italic text. --> _italic text_"
+        },
+        {
+          "if": { "properties": { "type": { "const": "strike" } } },
+          "then": {
+            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
+          },
+          "description": "Displays the contained elements with a strikethrough (crossed out). --> ~striked text~"
+        },
+        {
+          "if": { "properties": { "type": { "const": "sup" } } },
+          "then": {
+            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
+          },
+          "description": "Displays the contained elements as superscript (raised text). --> ^bold text^"
+        },
+        {
+          "if": { "properties": { "type": { "const": "underline" } } },
+          "then": {
+            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
+          },
+          "description": "Displays the contained elements with an underline. --> ~~underlined text~~"
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "effect" } } },
+          "then": {
+            "properties": {
+              "body": { "$ref": "#/definitions/Inlines" },
+              "start": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Step when the effect appears (optional)."
+              },
+              "stop": {
+                "type": "integer",
+                "description": "Step when the effect disappears, should only be defined in combination with start (optional)."
+              },
+              "playback": {
+                "type": "boolean",
+                "description": "If true, adds a TTS playback button (optional)."
+              },
+              "voice": {
+                "$ref": "#/definitions/Voice",
+                "description": "Specifies the TTS voice to use for playback. Only relevant if 'playback' is true. Overrides the default voice set at the document or section level (optional)."
+              }
+            }
+          },
+          "description": "An inline element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "link" } } },
+          "then": {
+            "properties": {
+              "linkType": {
+                "type": "string",
+                "enum": ["link", "image", "audio", "video", "embed"],
+                "description": "Specifies how the URL should be rendered: as a standard hyperlink ('link'), an embedded image ('image'), audio player ('audio'), video player ('video'), or embedded content ('embed'). For 'embed', the system will attempt to use oEmbed or an iframe for supported services (e.g., YouTube, Spotify)."
+              },
+              "alt": {
+                "$ref": "#/definitions/Inlines",
+                "description": "Alternative text for images, audio, and video. For standard links, this is the link text (if omitted, the URL is shown). Used for accessibility and displayed if the resource cannot be loaded. Optional."
+              },
+              "url": {
+                "type": "string",
+                "description": "The target URL or resource location. This can be a web link, image, audio, video, or embeddable content."
+              },
+              "title": {
+                "$ref": "#/definitions/Inlines",
+                "description": "A title or caption for the link. For images, audio, video, and embeds, this is used as a subtitle an tooltip. Optional."
+              }
+            }
+          },
+          "description": "Embeds or links to an external resource, such as a webpage, image, audio, video, or embeddable content."
+        },
+        {
+          "if": { "properties": { "type": { "const": "html" } } },
+          "then": {
+            "properties": {
+              "body": { "$ref": "#/definitions/Inlines" },
+              "htmlTag": {
+                "type": "string",
+                "description": "Define an inline html tag name like div, span, etc."
+              }
+            }
+          },
+          "description": "Displays an inline HTML element that might contain further inline elements, parameters are defined in attr."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "script" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Each string represents a line; all lines will be joined with a newline separator."
+                  }
+                ]
+              }
+            }
+          },
+          "description": "Create a script tag with code from the body. The body can be a single string or an array of strings (joined with newlines for readability)."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "code" } } },
+          "then": { "properties": { "body": { "type": "string" } } },
+          "description": "Display a verbatim element, the body will be displayed as it is."
+        },
+        {
+          "if": { "properties": { "type": { "const": "footnote" } } },
+          "then": { "properties": { "body": { "type": "string" } } },
+          "description": "Add a reference to a footnote block element."
+        },
+        {
+          "if": { "properties": { "type": { "const": "formula" } } },
+          "then": { "properties": { "body": { "type": "string" } } },
+          "description": "Use KaTeX formatted formulas in the string."
+        },
+        {
+          "if": { "properties": { "type": { "const": "string" } } },
+          "then": { "properties": { "body": { "type": "string" } } },
+          "description": "A string tagged element, as an alternative for applying string directly."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "input" } } },
+          "then": {
+            "properties": {
+              "solution": {
+                "type": "string",
+                "description": "The correct answer that user input will be checked against. Trailing whitespaces in the user's input will be ignored during comparison."
+              },
+              "length": {
+                "type": "integer",
+                "description": "Specifies the visible width of the input field in characters. Should be greater than or equal to the length of the solution. Optional."
+              }
+            }
+          },
+          "description": "An inline text input field, typically used for fill-in-the-blank (GapText) quizzes. The 'solution' property defines the correct answer."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "select" } } },
+          "then": {
+            "properties": {
+              "solution": {
+                "$ref": "#/definitions/Solution",
+                "description": "Defines the correct answer(s) for the dropdown. Can be a single integer (for one correct option), an array of integers (for multiple correct options), an empty array (if no selection is correct), or an array of booleans (where 'true' marks the correct options)."
+              },
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/Inlines" },
+                "description": "The selectable options displayed in the dropdown. Each option can be any inline element, including text, images, formulas, HTML, etc."
+              }
+            }
+          },
+          "description": "Displays a dropdown menu with selectable options, typically used for fill-in-the-blank (GapText) quizzes. The 'body' property defines the list of options, and the 'solution' property specifies which option(s) are correct."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "symbol" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "oneOf": [
+                  { "$ref": "#/definitions/Symbol" },
+                  {
+                    "type": "string",
+                    "description": "Any Unicode character, such as an emoji or special symbol."
+                  }
+                ]
+              }
+            }
+          },
+          "description": "Displays a single symbol, such as an arrow, emoji, or any Unicode character. Use a predefined symbol from the list or provide any string for custom symbols or emojis."
+        }
+      ]
+    },
+    "Solution": {
+      "description": "Defines the correct answer(s) for selection-based quizzes. Can be a single integer (for one correct option), an array of integers (for multiple correct options), an empty array (if no selection is correct), or an array of booleans (where 'true' marks the correct options).",
+      "oneOf": [
+        {
+          "type": "integer",
+          "description": "A single integer indicating the index of the correct option."
+        },
+        {
+          "type": "array",
+          "items": { "type": "integer" },
+          "description": "An array of integers indicating the indices of all correct options. Use an empty array if no selection is correct."
+        },
+        {
+          "type": "array",
+          "items": { "type": "boolean" },
+          "description": "An array of booleans, where each 'true' value marks the corresponding option as correct."
+        }
+      ]
+    },
+
+    "Symbol": {
+      "type": "string",
+      "enum": [
+        "<-->",
+        "<--",
+        "-->",
+        "<<-",
+        "->>",
+        "<->",
+        ">->",
+        "<-<",
+        "->",
+        "<-",
+        "<~",
+        "~>",
+        "<==>",
+        "==>",
+        "<==",
+        "<=>",
+        "=>",
+        "<=",
+        ":-)",
+        ";-)",
+        ":-D",
+        ":-O",
+        ":-(",
+        ":-|",
+        ":-/",
+        ":-\\",
+        ":-P",
+        ":-p",
+        ";-P",
+        ";-p",
+        ":-*",
+        ";-*",
+        ":')",
+        ":'(",
+        ":'[",
+        ":-[",
+        ":-#",
+        ":-X",
+        ":-§"
+      ],
+      "description": "A predefined symbol, such as an arrow, emoticon, or other special character. Use one of these for common symbols, or provide any Unicode string in the 'body' property for custom symbols or emojis."
+    },
+    "Voice": {
+      "type": "string",
+      "enum": [
+        "UK English Female",
+        "UK English Male",
+        "US English Female",
+        "US English Male",
+        "Afrikaans Male",
+        "Albanian Male",
+        "Arabic Female",
+        "Arabic Male",
+        "Armenian Male",
+        "Australian Female",
+        "Australian Male",
+        "Bangla Bangladesh Female",
+        "Bangla Bangladesh Male",
+        "Bangla India Female",
+        "Bangla India Male",
+        "Bosnian Male",
+        "Brazilian Portuguese Female",
+        "Brazilian Portuguese Male",
+        "Catalan Male",
+        "Chinese Female",
+        "Chinese Male",
+        "Chinese (Hong Kong) Female",
+        "Chinese (Hong Kong) Male",
+        "Chinese Taiwan Female",
+        "Chinese Taiwan Male",
+        "Croatian Male",
+        "Czech Female",
+        "Czech Male",
+        "Danish Female",
+        "Danish Male",
+        "Deutsch Female",
+        "Deutsch Male",
+        "Dutch Female",
+        "Dutch Male",
+        "Esperanto Male",
+        "Estonian Male",
+        "Filipino Female",
+        "Finnish Female",
+        "Finnish Male",
+        "French Canadian Female",
+        "French Canadian Male",
+        "French Female",
+        "French Male",
+        "Greek Female",
+        "Greek Male",
+        "Hindi Female",
+        "Hindi Male",
+        "Hungarian Female",
+        "Hungarian Male",
+        "Icelandic Male",
+        "Indonesian Female",
+        "Indonesian Male",
+        "Italian Female",
+        "Italian Male",
+        "Japanese Female",
+        "Japanese Male",
+        "Korean Female",
+        "Korean Male",
+        "Latin Female",
+        "Latin Male",
+        "Latvian Male",
+        "Macedonian Male",
+        "Moldavian Female",
+        "Moldavian Male",
+        "Montenegrin Male",
+        "Nepali",
+        "Norwegian Female",
+        "Norwegian Male",
+        "Polish Female",
+        "Polish Male",
+        "Portuguese Female",
+        "Portuguese Male",
+        "Romanian Female",
+        "Romanian Male",
+        "Russian Female",
+        "Russian Male",
+        "Serbian Male",
+        "Serbo-Croatian Male",
+        "Sinhala",
+        "Slovak Female",
+        "Slovak Male",
+        "Spanish Female",
+        "Spanish Male",
+        "Spanish Latin American Female",
+        "Spanish Latin American Male",
+        "Swahili Male",
+        "Swedish Female",
+        "Swedish Male",
+        "Tamil Female",
+        "Tamil Male",
+        "Thai Female",
+        "Thai Male",
+        "Turkish Female",
+        "Turkish Male",
+        "Ukrainian Female",
+        "Vietnamese Female",
+        "Vietnamese Male",
+        "Welsh Male"
+      ],
+      "description": "TTS voice to use (optional)."
+    }
+  }
+}

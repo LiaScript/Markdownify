@@ -26,43 +26,20 @@ import Json.Decode
 import Json.Encode exposing (encode)
 
 
-
-{-
-
-   { "type": "bold"
-   , "body": ...
-   , "attr": ...
-   }
--}
-
-
-elementOrString : Decoder String
-elementOrString =
-    oneOf [ element, string ]
-
-
-elementsOrString : Decoder String
-elementsOrString =
+elements : Decoder String
+elements =
     oneOf
-        [ list elementOrString |> map (String.join " ")
-        , elementOrString
+        [ string
+        , field "type" string
+            |> andThen typeOf
+        , Json.Decode.lazy (\_ -> list elements)
+            |> map (String.join " ")
         ]
-
-
-element : Decoder String
-element =
-    field "type" string
-        |> andThen typeOf
 
 
 body : Decoder String
 body =
-    [ element
-    , list (oneOf [ element, string ]) |> map (String.join "")
-    , stringOrList
-    ]
-        |> oneOf
-        |> field "body"
+    field "body" elements
 
 
 typeOf : String -> Decoder String
@@ -266,7 +243,7 @@ marked =
 
 inputOptions : Decoder (List String)
 inputOptions =
-    field "body" (list elementsOrString)
+    field "body" (list elements)
 
 
 link : Bool -> Decoder String
@@ -301,12 +278,12 @@ link multimedia =
                     )
             )
         )
-        (field "alt" elementsOrString
+        (field "alt" elements
             |> maybe
             |> map (Maybe.withDefault "")
         )
         (field "url" string)
-        (field "title" elementsOrString
+        (field "title" elements
             |> maybe
             |> map (Maybe.map (\s -> " \"" ++ s ++ "\"") >> Maybe.withDefault "")
         )

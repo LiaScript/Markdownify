@@ -29,7 +29,7 @@ elementsOrString : Json.Decoder String
 elementsOrString =
     [ Json.string
     , element
-    , inlines
+    , Inline.elements
     ]
         |> Json.oneOf
         |> Json.list
@@ -73,20 +73,11 @@ body =
         |> Json.field "body"
 
 
-inlines : Json.Decoder String
-inlines =
-    [ Inline.stringOrList
-    , Inline.element
-    , Json.list Inline.elementsOrString |> Json.map (String.join "")
-    ]
-        |> Json.oneOf
-
-
 typeOf : String -> Json.Decoder String
 typeOf id =
     case id of
         "paragraph" ->
-            Json.field "body" inlines
+            Json.field "body" Inline.elements
                 |> Json.andThen addAttributes
 
         "line" ->
@@ -119,7 +110,7 @@ typeOf id =
                         )
                 )
                 Inline.voice_
-                (Json.field "body" inlines)
+                (Json.field "body" Inline.elements)
                 |> Json.andThen addAttributes
 
         "gallery" ->
@@ -229,7 +220,7 @@ typeOf id =
             quiz |> Json.andThen addAttributes
 
         _ ->
-            Inline.element
+            Inline.elements
 
 
 addIndentation : String -> String -> String
@@ -273,7 +264,7 @@ asciiArt =
                 ++ "\n```"
         )
         (Json.field "body" Inline.stringOrList)
-        (Inline.elementsOrString
+        (Inline.elements
             |> Json.field "title"
             |> Json.maybe
             |> Json.map (Maybe.map ((++) "  ") >> Maybe.withDefault "")
@@ -324,14 +315,14 @@ table =
                 |> List.map (\r -> "| " ++ r ++ " |")
                 |> String.join "\n"
         )
-        (Json.list Inline.elementsOrString
+        (Json.list Inline.elements
             |> Json.field "head"
         )
         (Json.list Json.string
             |> Json.field "orientation"
             |> Json.maybe
         )
-        (Json.list Inline.elementsOrString
+        (Json.list Inline.elements
             |> Json.list
             |> Json.field "body"
         )
@@ -486,7 +477,7 @@ tasks =
             )
                 ++ append
         )
-        (Json.field "body" (Json.list Inline.elementsOrString))
+        (Json.field "body" (Json.list Inline.elements))
         (Inline.marked
             |> Json.field "done"
             |> Json.maybe
@@ -607,19 +598,19 @@ quizType =
                                 in
                                 "[ " ++ header ++ " ]\n" ++ body_ ++ "\n"
                             )
-                            (Json.field "head" (Json.list (Json.oneOf [ Inline.element, Inline.elementsOrString ])))
+                            (Json.field "head" (Json.list (Json.oneOf [ Inline.elements, Inline.elements ])))
                             (Json.field "body"
                                 (Json.list
                                     (Json.oneOf
                                         [ Json.field "single-choice"
                                             (Json.map2 (\solution opt -> ( True, solution, opt ))
                                                 (Json.field "solution" Inline.marked)
-                                                (Json.field "body" Inline.elementsOrString)
+                                                (Json.field "body" Inline.elements)
                                             )
                                         , Json.field "multiple-choice"
                                             (Json.map2 (\solution opt -> ( False, solution, opt ))
                                                 (Json.field "solution" Inline.marked)
-                                                (Json.field "body" Inline.elementsOrString)
+                                                (Json.field "body" Inline.elements)
                                             )
                                         ]
                                     )
@@ -639,7 +630,7 @@ quizType =
 
 quizHints : Json.Decoder (Maybe String)
 quizHints =
-    Json.list Inline.elementsOrString
+    Json.list Inline.elements
         |> Json.map (List.map ((++) "[[?]] ") >> String.join "\n")
         |> Json.field "hints"
         |> Json.maybe

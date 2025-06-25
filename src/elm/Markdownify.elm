@@ -30,7 +30,6 @@ body : Json.Decoder String
 body =
     [ Block.elementOrString
     , [ Block.elementOrString
-      , Block.inlines
       ]
         |> Json.oneOf
         |> Json.list
@@ -52,7 +51,7 @@ title : Json.Decoder String
 title =
     Json.map2 (\i t -> i ++ " " ++ t)
         indentation
-        (Json.field "title" Inline.elementsOrString)
+        (Json.field "title" Inline.elements)
 
 
 indentation : Json.Decoder String

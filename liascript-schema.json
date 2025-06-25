@@ -27,23 +27,21 @@
       "properties": {
         "title": { "type": "string" },
         "indent": { "type": "integer", "minimum": 1, "maximum": 6 },
-        "body": { "$ref": "#/definitions/blockOrStringArray" },
+        "body": { "$ref": "#/definitions/Blocks" },
         "meta": { "type": "object" }
       },
       "required": ["title", "indent", "body"]
     },
-    "blockOrStringArray": {
-      "oneOf": [
-        { "type": "string" },
-        {
-          "type": "array",
-          "items": {
-            "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/block" }]
-          }
-        }
-      ]
+    "Blocks": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/Block" },
+          { "$ref": "#/definitions/Inlines" }
+        ]
+      }
     },
-    "block": {
+    "Block": {
       "type": "object",
       "properties": {
         "type": { "type": "string" },
@@ -55,14 +53,138 @@
         {
           "if": { "properties": { "type": { "const": "paragraph" } } },
           "then": {
-            "properties": { "body": { "$ref": "#/definitions/inlines" } }
-          }
+            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
+          },
+          "description": "A block element that displays its content as a paragraph. The 'body' can be a string, a single inline element, or an array of strings and inlines. Additional HTML attributes can be set via 'attr' for custom styling."
         },
+
+        {
+          "if": { "properties": { "type": { "const": "line" } } },
+          "then": {
+            "not": { "required": ["body"] }
+          },
+          "description": "A horizontal line, corresponds to hr tag in html, can be styled via attr and has no body"
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "comment" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "$ref": "#/definitions/Inlines",
+                "description": "The content of the comment, which can be a string, a single inline element, or an array of strings and inlines. This text will be read aloud by the TTS engine at the specified animation step."
+              },
+              "start": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The animation step at which this comment will be read aloud in Presentation or Slides mode."
+              },
+              "voice": {
+                "$ref": "#/definitions/Voice",
+                "description": "Overrides the default TTS voice for this comment. Optional."
+              }
+            },
+            "required": ["body", "start"]
+          },
+          "description": "A comment is a paragraph that will be read aloud by the TTS engine at a specific animation step in Presentation or Slides mode. In Textbook mode, it is rendered as visible text. Comments are typically used to narrate or explain animation steps. If multiple comments share the same 'start' value, they are read together in order of appearance."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "effect" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "oneOf": [
+                  { "$ref": "#/definitions/Block" },
+                  {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Block" },
+                    "description": "An array of blocks; each block will be animated according to the effect settings."
+                  }
+                ],
+                "description": "The content to animate. Can be a single block or an array of blocks."
+              },
+              "start": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Step when the effect appears (optional)."
+              },
+              "stop": {
+                "type": "integer",
+                "description": "Step when the effect disappears, should only be defined in combination with start (optional)."
+              },
+              "playback": {
+                "type": "boolean",
+                "description": "If true, adds a TTS playback button (optional)."
+              },
+              "voice": {
+                "$ref": "#/definitions/Voice",
+                "description": "Specifies the TTS voice to use for playback. Only relevant if 'playback' is true. Overrides the default voice set at the document or section level (optional)."
+              }
+            }
+          },
+          "description": "A block element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "gallery" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/MultimediaLink" },
+                "description": "An array of multimedia links (image, audio, video, or embed) to display in the gallery."
+              }
+            }
+          },
+          "description": "Displays a gallery of media elements. The body must be an array of multimedia links."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "formula" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Each string represents a line; all lines will be joined with a newline separator."
+                  }
+                ],
+                "description": "The formula content in KaTeX syntax. Can be a single string or an array of strings (for readability); if an array, lines are joined with newlines before rendering."
+              }
+            }
+          },
+          "description": "Displays a mathematical formula using KaTeX. The body can be a single string or an array of strings for multi-line formulas."
+        },
+
+        {
+          "if": { "properties": { "type": { "const": "quote" } } },
+          "then": {
+            "properties": {
+              "body": {
+                "oneOf": [
+                  { "$ref": "#/definitions/Block" },
+                  { "$ref": "#/definitions/Blocks" }
+                ],
+                "description": "The quoted content. Can be a single block or an array of blocks."
+              },
+              "by": {
+                "$ref": "#/definitions/Inlines",
+                "description": "Optional. If provided, displays the quote as a citation with the given author or source."
+              }
+            }
+          },
+          "description": "Displays a blockquote. The 'body' contains the quoted content (single block or array of blocks). If 'by' is set, the quote is rendered as a citation."
+        },
+
         {
           "if": { "properties": { "type": { "const": "itemize" } } },
           "then": {
             "properties": {
-              "body": { "$ref": "#/definitions/blockOrStringArray" }
+              "body": { "$ref": "#/definitions/Blocks" }
             }
           }
         },
@@ -70,49 +192,8 @@
           "if": { "properties": { "type": { "const": "enumerate" } } },
           "then": {
             "properties": {
-              "body": { "$ref": "#/definitions/blockOrStringArray" }
+              "body": { "$ref": "#/definitions/Blocks" }
             }
-          }
-        },
-        {
-          "if": { "properties": { "type": { "const": "quote" } } },
-          "then": {
-            "properties": {
-              "body": { "$ref": "#/definitions/blockOrStringArray" },
-              "by": { "$ref": "#/definitions/inlines" }
-            }
-          }
-        },
-        {
-          "if": { "properties": { "type": { "const": "comment" } } },
-          "then": {
-            "properties": {
-              "body": { "$ref": "#/definitions/inlines" },
-              "start": { "type": "integer" },
-              "voice": { "type": "string" }
-            },
-            "required": ["body", "start"]
-          }
-        },
-        {
-          "if": { "properties": { "type": { "const": "effect" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "oneOf": [
-                  { "$ref": "#/definitions/block" },
-                  {
-                    "type": "array",
-                    "items": { "$ref": "#/definitions/block" }
-                  }
-                ]
-              },
-              "start": { "type": "integer" },
-              "stop": { "type": "integer" },
-              "playback": { "type": "boolean" },
-              "voice": { "type": "string" }
-            },
-            "required": ["body", "start"]
           }
         }
       ]
@@ -206,30 +287,39 @@
         {
           "if": { "properties": { "type": { "const": "link" } } },
           "then": {
-            "properties": {
-              "linkType": {
-                "type": "string",
-                "enum": ["link", "image", "audio", "video", "embed"],
-                "description": "Specifies how the URL should be rendered: as a standard hyperlink ('link'), an embedded image ('image'), audio player ('audio'), video player ('video'), or embedded content ('embed'). For 'embed', the system will attempt to use oEmbed or an iframe for supported services (e.g., YouTube, Spotify)."
+            "oneOf": [
+              {
+                "properties": {
+                  "type": { "const": "link" },
+                  "linkType": {
+                    "type": "string",
+                    "const": "link",
+                    "description": "Specifies that this is a standard hyperlink."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "The target URL for the hyperlink."
+                  },
+                  "alt": {
+                    "$ref": "#/definitions/Inlines",
+                    "description": "The link text. If omitted, the URL is shown."
+                  },
+                  "title": {
+                    "$ref": "#/definitions/Inlines",
+                    "description": "A title or tooltip for the link. Optional."
+                  }
+                },
+                "required": ["type", "linkType", "url"],
+                "description": "A standard hyperlink."
               },
-              "alt": {
-                "$ref": "#/definitions/Inlines",
-                "description": "Alternative text for images, audio, and video. For standard links, this is the link text (if omitted, the URL is shown). Used for accessibility and displayed if the resource cannot be loaded. Optional."
-              },
-              "url": {
-                "type": "string",
-                "description": "The target URL or resource location. This can be a web link, image, audio, video, or embeddable content."
-              },
-              "title": {
-                "$ref": "#/definitions/Inlines",
-                "description": "A title or caption for the link. For images, audio, video, and embeds, this is used as a subtitle an tooltip. Optional."
-              }
-            }
+              { "$ref": "#/definitions/MultimediaLink" }
+            ]
           },
-          "description": "Embeds or links to an external resource, such as a webpage, image, audio, video, or embeddable content."
+          "description": "Embeds or links to an external resource. Can be a standard hyperlink or a multimedia element (image, audio, video, or embed)."
         },
+
         {
-          "if": { "properties": { "type": { "const": "html" } } },
+          "if": { "properties": { "type": { "const": "html_" } } },
           "then": {
             "properties": {
               "body": { "$ref": "#/definitions/Inlines" },
@@ -262,7 +352,7 @@
         },
 
         {
-          "if": { "properties": { "type": { "const": "code" } } },
+          "if": { "properties": { "type": { "const": "code_" } } },
           "then": { "properties": { "body": { "type": "string" } } },
           "description": "Display a verbatim element, the body will be displayed as it is."
         },
@@ -272,7 +362,7 @@
           "description": "Add a reference to a footnote block element."
         },
         {
-          "if": { "properties": { "type": { "const": "formula" } } },
+          "if": { "properties": { "type": { "const": "formula_" } } },
           "then": { "properties": { "body": { "type": "string" } } },
           "description": "Use KaTeX formatted formulas in the string."
         },
@@ -354,6 +444,22 @@
           "description": "An array of booleans, where each 'true' value marks the corresponding option as correct."
         }
       ]
+    },
+
+    "MultimediaLink": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "link" },
+        "linkType": {
+          "type": "string",
+          "enum": ["image", "audio", "video", "embed"]
+        },
+        "alt": { "$ref": "#/definitions/Inlines" },
+        "url": { "type": "string" },
+        "title": { "$ref": "#/definitions/Inlines" }
+      },
+      "required": ["type", "linkType", "url"],
+      "description": "A link to a multimedia resource (image, audio, video, or embeddable content) for use in galleries."
     },
 
     "Symbol": {

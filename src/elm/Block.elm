@@ -17,37 +17,19 @@ indentation =
             )
 
 
-elementOrString : Json.Decoder String
-elementOrString =
-    Json.oneOf
-        [ Json.string
-        , element
-        ]
-
-
-elementsOrString : Json.Decoder String
-elementsOrString =
-    [ Json.string
-    , element
-    , Inline.elements
-    ]
-        |> Json.oneOf
-        |> Json.list
-        |> Json.map (String.join "\n\n")
-
-
+elements : Json.Decoder String
 elements =
-    [ element
-    , Json.list element
+    Json.list element
         |> Json.map (String.join "\n\n")
-    ]
-        |> Json.oneOf
 
 
 element : Json.Decoder String
 element =
-    Json.field "type" Json.string
+    [ Inline.elements
+    , Json.field "type" Json.string
         |> Json.andThen typeOf
+    ]
+        |> Json.oneOf
 
 
 addAttributes : String -> Json.Decoder String
@@ -127,7 +109,7 @@ typeOf id =
 
         "effect" ->
             Json.oneOf
-                [ elementOrString
+                [ elements
                     |> Json.field "body"
                     |> Inline.effect
                     |> Json.map
@@ -137,7 +119,7 @@ typeOf id =
                                 ++ "}}\n"
                                 ++ content
                         )
-                , elementOrString
+                , elements
                     |> Json.list
                     |> Json.field "body"
                     |> Json.andThen
@@ -192,10 +174,14 @@ typeOf id =
             table |> Json.andThen addAttributes
 
         "itemize" ->
-            unorderedList |> Json.andThen addAttributes
+            Json.field "body" (Json.list element)
+                |> Json.map unorderedList
+                |> Json.andThen addAttributes
 
         "enumerate" ->
-            orderedList |> Json.andThen addAttributes
+            Json.field "body" (Json.list element)
+                |> Json.map orderedList
+                |> Json.andThen addAttributes
 
         "code" ->
             Json.map2
@@ -243,14 +229,8 @@ quote =
                     Just author ->
                         quote_ ++ "\n\n-- " ++ author
         )
-        (Json.field "body"
-            (Json.oneOf
-                [ elementsOrString
-                , elementOrString
-                ]
-            )
-        )
-        (Json.field "by" elementOrString |> Json.maybe)
+        (Json.field "body" elements)
+        (Json.field "by" elements |> Json.maybe)
 
 
 asciiArt : Json.Decoder String
@@ -328,59 +308,39 @@ table =
         )
 
 
-unorderedList : Json.Decoder String
+unorderedList : List String -> String
 unorderedList =
-    Json.field "body"
-        ([ Json.list elementOrString
-            |> Json.map (String.join "\n\n")
-         , elementOrString
-         ]
-            |> Json.oneOf
-            |> Json.list
-        )
-        |> Json.map
-            (List.map
-                (String.lines
-                    >> List.indexedMap
-                        (\i l ->
-                            if i == 0 then
-                                "* " ++ l
+    List.map
+        (String.lines
+            >> List.indexedMap
+                (\i l ->
+                    if i == 0 then
+                        "* " ++ l
 
-                            else
-                                "  " ++ l
-                        )
-                    >> String.join "\n"
+                    else
+                        "  " ++ l
                 )
-                >> String.join "\n\n"
-            )
+            >> String.join "\n"
+        )
+        >> String.join "\n\n"
 
 
-orderedList : Json.Decoder String
+orderedList : List String -> String
 orderedList =
-    Json.field "body"
-        ([ Json.list elementOrString
-            |> Json.map (String.join "\n\n")
-         , elementOrString
-         ]
-            |> Json.oneOf
-            |> Json.list
-        )
-        |> Json.map
-            (List.indexedMap
-                (\id ->
-                    String.lines
-                        >> List.indexedMap
-                            (\i l ->
-                                if i == 0 then
-                                    String.fromInt (id + 1) ++ ". " ++ l
+    List.indexedMap
+        (\id ->
+            String.lines
+                >> List.indexedMap
+                    (\i l ->
+                        if i == 0 then
+                            String.fromInt (id + 1) ++ ". " ++ l
 
-                                else
-                                    "   " ++ l
-                            )
-                        >> String.join "\n"
-                )
-                >> String.join "\n\n"
-            )
+                        else
+                            "   " ++ l
+                    )
+                >> String.join "\n"
+        )
+        >> String.join "\n\n"
 
 
 code : Json.Decoder String
@@ -618,7 +578,7 @@ quizType =
                             )
 
                     "gap-text" ->
-                        Json.field "body" elementOrString
+                        Json.field "body" element
 
                     "generic" ->
                         Json.succeed "[[!]]\n"
@@ -638,7 +598,7 @@ quizHints =
 
 quizAnswer : Json.Decoder String
 quizAnswer =
-    Json.field "answer" (Json.oneOf [ elementsOrString, elementOrString ])
+    Json.field "answer" elements
         |> Json.map (\s -> "\n************************\n\n" ++ s ++ "\n\n************************")
         |> Json.maybe
         |> Json.map (Maybe.withDefault "")

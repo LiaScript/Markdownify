@@ -110,7 +110,7 @@ typeOf id =
 
         "effect" ->
             Json.oneOf
-                [ elements
+                [ element
                     |> Json.field "body"
                     |> Inline.effect
                     |> Json.map
@@ -120,7 +120,7 @@ typeOf id =
                                 ++ "}}\n"
                                 ++ content
                         )
-                , elements
+                , element
                     |> Json.list
                     |> Json.field "body"
                     |> Json.andThen

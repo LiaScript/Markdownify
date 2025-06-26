@@ -32,6 +32,18 @@
       },
       "required": ["title", "indent", "body"]
     },
+
+    "StringOrList": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Each string represents a line; all lines will be joined with a newline separator."
+        }
+      ]
+    },
+
     "Blocks": {
       "type": "array",
       "items": {
@@ -42,165 +54,257 @@
       }
     },
     "Block": {
+      "oneOf": [
+        { "$ref": "#/definitions/ParagraphBlock" },
+        { "$ref": "#/definitions/LineBlock" },
+        { "$ref": "#/definitions/CommentBlock" },
+        { "$ref": "#/definitions/EffectBlock" },
+        { "$ref": "#/definitions/GalleryBlock" },
+        { "$ref": "#/definitions/FormulaBlock" },
+        { "$ref": "#/definitions/QuoteBlock" },
+        { "$ref": "#/definitions/ListBlock" },
+        { "$ref": "#/definitions/HtmlBlock" },
+        { "$ref": "#/definitions/CodeBlock" },
+        { "$ref": "#/definitions/TableBlock" }
+      ]
+    },
+
+    "ParagraphBlock": {
       "type": "object",
       "properties": {
-        "type": { "type": "string" },
-        "body": {},
+        "type": { "const": "paragraph" },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "A block element that displays its content as a paragraph. The 'body' can be a string, a single inline element, or an array of strings and inlines. Additional HTML attributes can be set via 'attr' for custom styling."
+    },
+
+    "LineBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "line" },
         "attr": { "type": "object" }
       },
       "required": ["type"],
-      "allOf": [
-        {
-          "if": { "properties": { "type": { "const": "paragraph" } } },
-          "then": {
-            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
-          },
-          "description": "A block element that displays its content as a paragraph. The 'body' can be a string, a single inline element, or an array of strings and inlines. Additional HTML attributes can be set via 'attr' for custom styling."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "line" } } },
-          "then": {
-            "not": { "required": ["body"] }
-          },
-          "description": "A horizontal line, corresponds to hr tag in html, can be styled via attr and has no body"
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "comment" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "$ref": "#/definitions/Inlines",
-                "description": "The content of the comment, which can be a string, a single inline element, or an array of strings and inlines. This text will be read aloud by the TTS engine at the specified animation step."
-              },
-              "start": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "The animation step at which this comment will be read aloud in Presentation or Slides mode."
-              },
-              "voice": {
-                "$ref": "#/definitions/Voice",
-                "description": "Overrides the default TTS voice for this comment. Optional."
-              }
-            },
-            "required": ["body", "start"]
-          },
-          "description": "A comment is a paragraph that will be read aloud by the TTS engine at a specific animation step in Presentation or Slides mode. In Textbook mode, it is rendered as visible text. Comments are typically used to narrate or explain animation steps. If multiple comments share the same 'start' value, they are read together in order of appearance."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "effect" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "oneOf": [
-                  { "$ref": "#/definitions/Block" },
-                  {
-                    "type": "array",
-                    "items": { "$ref": "#/definitions/Block" },
-                    "description": "An array of blocks; each block will be animated according to the effect settings."
-                  }
-                ],
-                "description": "The content to animate. Can be a single block or an array of blocks."
-              },
-              "start": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Step when the effect appears (optional)."
-              },
-              "stop": {
-                "type": "integer",
-                "description": "Step when the effect disappears, should only be defined in combination with start (optional)."
-              },
-              "playback": {
-                "type": "boolean",
-                "description": "If true, adds a TTS playback button (optional)."
-              },
-              "voice": {
-                "$ref": "#/definitions/Voice",
-                "description": "Specifies the TTS voice to use for playback. Only relevant if 'playback' is true. Overrides the default voice set at the document or section level (optional)."
-              }
-            }
-          },
-          "description": "A block element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "gallery" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "type": "array",
-                "items": { "$ref": "#/definitions/MultimediaLink" },
-                "description": "An array of multimedia links (image, audio, video, or embed) to display in the gallery."
-              }
-            }
-          },
-          "description": "Displays a gallery of media elements. The body must be an array of multimedia links."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "formula" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "oneOf": [
-                  { "type": "string" },
-                  {
-                    "type": "array",
-                    "items": { "type": "string" },
-                    "description": "Each string represents a line; all lines will be joined with a newline separator."
-                  }
-                ],
-                "description": "The formula content in KaTeX syntax. Can be a single string or an array of strings (for readability); if an array, lines are joined with newlines before rendering."
-              }
-            }
-          },
-          "description": "Displays a mathematical formula using KaTeX. The body can be a single string or an array of strings for multi-line formulas."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "quote" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "oneOf": [
-                  { "$ref": "#/definitions/Block" },
-                  { "$ref": "#/definitions/Blocks" }
-                ],
-                "description": "The quoted content. Can be a single block or an array of blocks."
-              },
-              "by": {
-                "$ref": "#/definitions/Inlines",
-                "description": "Optional. If provided, displays the quote as a citation with the given author or source."
-              }
-            }
-          },
-          "description": "Displays a blockquote. The 'body' contains the quoted content (single block or array of blocks). If 'by' is set, the quote is rendered as a citation."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "itemize" } } },
-          "then": {
-            "properties": {
-              "body": { "$ref": "#/definitions/Blocks" }
-            }
-          }
-        },
-        {
-          "if": { "properties": { "type": { "const": "enumerate" } } },
-          "then": {
-            "properties": {
-              "body": { "$ref": "#/definitions/Blocks" }
-            }
-          }
-        }
-      ]
+      "description": "A horizontal line, corresponds to hr tag in html, can be styled via attr and has no body"
     },
+
+    "CommentBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "comment" },
+        "body": {
+          "$ref": "#/definitions/Inlines",
+          "description": "The content of the comment, which can be a string, a single inline element, or an array of strings and inlines. This text will be read aloud by the TTS engine at the specified animation step."
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The animation step at which this comment will be read aloud in Presentation or Slides mode."
+        },
+        "voice": {
+          "$ref": "#/definitions/Voice",
+          "description": "Overrides the default TTS voice for this comment. Optional."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "A comment is a paragraph that will be read aloud by the TTS engine at a specific animation step in Presentation or Slides mode. In Textbook mode, it is rendered as visible text. Comments are typically used to narrate or explain animation steps. If multiple comments share the same 'start' value, they are read together in order of appearance."
+    },
+
+    "EffectBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "effect" },
+        "body": {
+          "oneOf": [
+            { "$ref": "#/definitions/Block" },
+            { "$ref": "#/definitions/Blocks" }
+          ],
+          "description": "The content to animate. Can be a single block or an array of blocks."
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Step when the effect appears (optional)."
+        },
+        "stop": {
+          "type": "integer",
+          "description": "Step when the effect disappears, should only be defined in combination with start (optional)."
+        },
+        "playback": {
+          "type": "boolean",
+          "description": "If true, adds a TTS playback button (optional)."
+        },
+        "voice": {
+          "$ref": "#/definitions/Voice",
+          "description": "Specifies the TTS voice to use for playback. Only relevant if 'playback' is true. Overrides the default voice set at the document or section level (optional)."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "A block element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
+    },
+
+    "GalleryBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "gallery" },
+        "body": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Multimedia" },
+          "description": "An array of multimedia links (image, audio, video, or embed) to display in the gallery."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays a gallery of media elements. The body must be an array of multimedia links."
+    },
+
+    "FormulaBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "formula" },
+        "body": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Each string represents a line; all lines will be joined with a newline separator."
+            }
+          ],
+          "description": "The formula content in KaTeX syntax. Can be a single string or an array of strings (for readability); if an array, lines are joined with newlines before rendering."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays a mathematical formula using KaTeX. The body can be a single string or an array of strings for multi-line formulas."
+    },
+
+    "QuoteBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "quote" },
+        "body": {
+          "oneOf": [
+            { "$ref": "#/definitions/Block" },
+            { "$ref": "#/definitions/Blocks" }
+          ],
+          "description": "The quoted content. Can be a single block or an array of blocks."
+        },
+        "by": {
+          "$ref": "#/definitions/Inlines",
+          "description": "Optional. If provided, displays the quote as a citation with the given author or source."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays a blockquote. The 'body' contains the quoted content (single block or array of blocks). If 'by' is set, the quote is rendered as a citation."
+    },
+
+    "ListBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "list" },
+        "body": {
+          "oneOf": [
+            { "$ref": "#/definitions/Block" },
+            { "$ref": "#/definitions/Blocks" }
+          ],
+          "description": "The quoted content. Can be a single block or an array of blocks."
+        },
+        "ordered": {
+          "type": "boolean",
+          "description": "Defines if it is an ordered or an unordered list, by default it is false."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays a blockquote. The 'body' contains the quoted content (single block or array of blocks). If 'by' is set, the quote is rendered as a citation."
+    },
+
+    "HtmlBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "html" },
+        "htmlTag": {
+          "type": "string",
+          "description": "Define an inline html tag name like div, span, etc."
+        },
+        "body": {
+          "oneOf": [
+            { "$ref": "#/definitions/Block" },
+            { "$ref": "#/definitions/Blocks" }
+          ]
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "htmlTag", "body"],
+      "description": "In contrast to an html inline element, this body can contain entire Block elements."
+    },
+
+    "CodeBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "code" },
+        "title": { "type": "string", "description": "A filename" },
+        "language": {
+          "type": "string",
+          "description": "This is a short code for the used syntax highlighting, such java, markdown, cpp, lua, prolog, etc."
+        },
+        "closed": {
+          "type": "boolean",
+          "description": "Defines if the content of the file shall be hidden at first, the user can decide to open it afterwards."
+        },
+        "body": { "$ref": "#/definitions/StringOrList" },
+        "execute": {
+          "$ref": "#/definitions/StringOrList",
+          "description": "This optional property that makes the code block editable and executable. It contains JavaScript with an @input marker. This marker is replaced before the execution with the current content of the code-block."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "This will show an entire code block with syntax highlighting and an optional title. The execute field will turn the code-block into an editor with a run button that will execute the code."
+    },
+
+    "TableBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "table" },
+        "head": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Inlines" },
+          "description": "Defines the table header. Each entry represents the content of a column header and can be a string, a single inline element, or an array of inlines."
+        },
+        "alignment": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["left", "right", "center"]
+          },
+          "description": "Specifies the alignment of each column: 'left', 'right', or 'center'. The number of entries must match the number of columns in the header. If omitted, all columns default to left alignment."
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/Inlines" }
+          },
+          "description": "Defines the table rows. Each row is an array of cells, and each cell can contain a string, a single inline element, or an array of inlines."
+        },
+        "attr": {
+          "type": "object",
+          "description": "Optional HTML attributes for custom styling or additional properties."
+        }
+      },
+      "required": ["type", "head", "body"],
+      "description": "Displays a table with a header, optional column alignment, and a body of rows. Each cell can contain rich inline content. Additional HTML attributes can be set via 'attr' for custom styling."
+    },
+
     "Inlines": {
       "oneOf": [
-        { "type": "string" },
         {
           "type": "array",
           "items": { "$ref": "#/definitions/Inline" }
@@ -208,224 +312,295 @@
         { "$ref": "#/definitions/Inline" }
       ]
     },
+
     "Inline": {
-      "type": "object",
-      "properties": {
-        "type": { "type": "string" },
-        "body": {},
-        "attr": { "type": "object" }
-      },
-      "required": ["type"],
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "type": { "const": "bold" }
-            }
-          },
-          "then": {
-            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
-          },
-          "description": "Displays the contained elements in bold text. --> __bold text__"
-        },
-        {
-          "if": { "properties": { "type": { "const": "italic" } } },
-          "then": {
-            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
-          },
-          "description": "Displays the contained elements in italic text. --> _italic text_"
-        },
-        {
-          "if": { "properties": { "type": { "const": "strike" } } },
-          "then": {
-            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
-          },
-          "description": "Displays the contained elements with a strikethrough (crossed out). --> ~striked text~"
-        },
-        {
-          "if": { "properties": { "type": { "const": "sup" } } },
-          "then": {
-            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
-          },
-          "description": "Displays the contained elements as superscript (raised text). --> ^bold text^"
-        },
-        {
-          "if": { "properties": { "type": { "const": "underline" } } },
-          "then": {
-            "properties": { "body": { "$ref": "#/definitions/Inlines" } }
-          },
-          "description": "Displays the contained elements with an underline. --> ~~underlined text~~"
-        },
+      "oneOf": [
+        { "$ref": "#/definitions/Bold" },
+        { "$ref": "#/definitions/Italic" },
+        { "$ref": "#/definitions/Strike" },
 
-        {
-          "if": { "properties": { "type": { "const": "effect" } } },
-          "then": {
-            "properties": {
-              "body": { "$ref": "#/definitions/Inlines" },
-              "start": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Step when the effect appears (optional)."
-              },
-              "stop": {
-                "type": "integer",
-                "description": "Step when the effect disappears, should only be defined in combination with start (optional)."
-              },
-              "playback": {
-                "type": "boolean",
-                "description": "If true, adds a TTS playback button (optional)."
-              },
-              "voice": {
-                "$ref": "#/definitions/Voice",
-                "description": "Specifies the TTS voice to use for playback. Only relevant if 'playback' is true. Overrides the default voice set at the document or section level (optional)."
-              }
-            }
-          },
-          "description": "An inline element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
-        },
+        { "$ref": "#/definitions/Sup" },
+        { "$ref": "#/definitions/Underline" },
+        { "$ref": "#/definitions/Effect" },
+        { "$ref": "#/definitions/Html" },
+        { "$ref": "#/definitions/Script" },
+        { "$ref": "#/definitions/Code" },
+        { "$ref": "#/definitions/Footnote" },
+        { "$ref": "#/definitions/Formula" },
+        { "$ref": "#/definitions/Symbol" },
 
-        {
-          "if": { "properties": { "type": { "const": "link" } } },
-          "then": {
-            "oneOf": [
-              {
-                "properties": {
-                  "type": { "const": "link" },
-                  "linkType": {
-                    "type": "string",
-                    "const": "link",
-                    "description": "Specifies that this is a standard hyperlink."
-                  },
-                  "url": {
-                    "type": "string",
-                    "description": "The target URL for the hyperlink."
-                  },
-                  "alt": {
-                    "$ref": "#/definitions/Inlines",
-                    "description": "The link text. If omitted, the URL is shown."
-                  },
-                  "title": {
-                    "$ref": "#/definitions/Inlines",
-                    "description": "A title or tooltip for the link. Optional."
-                  }
-                },
-                "required": ["type", "linkType", "url"],
-                "description": "A standard hyperlink."
-              },
-              { "$ref": "#/definitions/MultimediaLink" }
-            ]
-          },
-          "description": "Embeds or links to an external resource. Can be a standard hyperlink or a multimedia element (image, audio, video, or embed)."
-        },
+        { "$ref": "#/definitions/String" },
 
-        {
-          "if": { "properties": { "type": { "const": "html_" } } },
-          "then": {
-            "properties": {
-              "body": { "$ref": "#/definitions/Inlines" },
-              "htmlTag": {
-                "type": "string",
-                "description": "Define an inline html tag name like div, span, etc."
-              }
-            }
-          },
-          "description": "Displays an inline HTML element that might contain further inline elements, parameters are defined in attr."
-        },
+        { "$ref": "#/definitions/Link" },
+        { "$ref": "#/definitions/Multimedia" },
 
-        {
-          "if": { "properties": { "type": { "const": "script" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "oneOf": [
-                  { "type": "string" },
-                  {
-                    "type": "array",
-                    "items": { "type": "string" },
-                    "description": "Each string represents a line; all lines will be joined with a newline separator."
-                  }
-                ]
-              }
-            }
-          },
-          "description": "Create a script tag with code from the body. The body can be a single string or an array of strings (joined with newlines for readability)."
-        },
+        { "$ref": "#/definitions/Input" },
+        { "$ref": "#/definitions/Select" },
 
-        {
-          "if": { "properties": { "type": { "const": "code_" } } },
-          "then": { "properties": { "body": { "type": "string" } } },
-          "description": "Display a verbatim element, the body will be displayed as it is."
-        },
-        {
-          "if": { "properties": { "type": { "const": "footnote" } } },
-          "then": { "properties": { "body": { "type": "string" } } },
-          "description": "Add a reference to a footnote block element."
-        },
-        {
-          "if": { "properties": { "type": { "const": "formula_" } } },
-          "then": { "properties": { "body": { "type": "string" } } },
-          "description": "Use KaTeX formatted formulas in the string."
-        },
-        {
-          "if": { "properties": { "type": { "const": "string" } } },
-          "then": { "properties": { "body": { "type": "string" } } },
-          "description": "A string tagged element, as an alternative for applying string directly."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "input" } } },
-          "then": {
-            "properties": {
-              "solution": {
-                "type": "string",
-                "description": "The correct answer that user input will be checked against. Trailing whitespaces in the user's input will be ignored during comparison."
-              },
-              "length": {
-                "type": "integer",
-                "description": "Specifies the visible width of the input field in characters. Should be greater than or equal to the length of the solution. Optional."
-              }
-            }
-          },
-          "description": "An inline text input field, typically used for fill-in-the-blank (GapText) quizzes. The 'solution' property defines the correct answer."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "select" } } },
-          "then": {
-            "properties": {
-              "solution": {
-                "$ref": "#/definitions/Solution",
-                "description": "Defines the correct answer(s) for the dropdown. Can be a single integer (for one correct option), an array of integers (for multiple correct options), an empty array (if no selection is correct), or an array of booleans (where 'true' marks the correct options)."
-              },
-              "body": {
-                "type": "array",
-                "items": { "$ref": "#/definitions/Inlines" },
-                "description": "The selectable options displayed in the dropdown. Each option can be any inline element, including text, images, formulas, HTML, etc."
-              }
-            }
-          },
-          "description": "Displays a dropdown menu with selectable options, typically used for fill-in-the-blank (GapText) quizzes. The 'body' property defines the list of options, and the 'solution' property specifies which option(s) are correct."
-        },
-
-        {
-          "if": { "properties": { "type": { "const": "symbol" } } },
-          "then": {
-            "properties": {
-              "body": {
-                "oneOf": [
-                  { "$ref": "#/definitions/Symbol" },
-                  {
-                    "type": "string",
-                    "description": "Any Unicode character, such as an emoji or special symbol."
-                  }
-                ]
-              }
-            }
-          },
-          "description": "Displays a single symbol, such as an arrow, emoji, or any Unicode character. Use a predefined symbol from the list or provide any string for custom symbols or emojis."
-        }
+        { "type": "string" }
       ]
     },
+
+    "Bold": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "bold" },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "An inline element that displays its content in bold. --> __bold text__"
+    },
+
+    "Italic": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "italic" },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays the contained elements in italic text. --> _italic text_"
+    },
+
+    "Strike": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "strike" },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays the contained elements with a strikethrough (crossed out). --> ~striked text~"
+    },
+
+    "Sup": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "sup" },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays the contained elements as superscript (raised text). --> ^bold text^"
+    },
+
+    "Underline": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "underline" },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays the contained elements with an underline. --> ~~underlined text~~"
+    },
+
+    "Html": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "html" },
+        "htmlTag": {
+          "type": "string",
+          "description": "Define an inline html tag name like div, span, etc."
+        },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "htmlTag"],
+      "description": "Displays an inline HTML element that might contain further inline elements, parameters are defined in attr."
+    },
+
+    "Script": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "script" },
+
+        "body": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Each string represents a line; all lines will be joined with a newline separator."
+            }
+          ]
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Create a script tag with code from the body. The body can be a single string or an array of strings (joined with newlines for readability)."
+    },
+
+    "Code": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "code" },
+
+        "body": { "type": "string" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Display a verbatim element, the body will be displayed as it is."
+    },
+
+    "Footnote": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "footnote" },
+        "body": { "type": "string" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Add a reference to a footnote block element."
+    },
+
+    "Formula": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "formula" },
+        "body": { "type": "string" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Use KaTeX formatted formulas in the string."
+    },
+
+    "String": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "formula" },
+        "body": { "type": "string" },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "A string tagged element, as an alternative for applying string directly."
+    },
+
+    "Effect": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "effect" },
+        "body": { "$ref": "#/definitions/Inlines" },
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Step when the effect appears (optional)."
+        },
+        "stop": {
+          "type": "integer",
+          "description": "Step when the effect disappears, should only be defined in combination with start (optional)."
+        },
+        "playback": {
+          "type": "boolean",
+          "description": "If true, adds a TTS playback button (optional)."
+        },
+        "voice": {
+          "$ref": "#/definitions/Voice",
+          "description": "Specifies the TTS voice to use for playback. Only relevant if 'playback' is true. Overrides the default voice set at the document or section level (optional)."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "An inline element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
+    },
+
+    "Link": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "link" },
+        "linkType": { "const": "link" },
+
+        "url": {
+          "type": "string",
+          "description": "The target URL for the hyperlink."
+        },
+        "alt": {
+          "$ref": "#/definitions/Inlines",
+          "description": "The link text. If omitted, the URL is shown."
+        },
+        "title": {
+          "$ref": "#/definitions/Inlines",
+          "description": "A title or tooltip for the link. Optional."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "linkType", "url"],
+      "description": "Specifies a hyperlink"
+    },
+
+    "Multimedia": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "link" },
+        "linkType": {
+          "type": "string",
+          "enum": ["image", "audio", "video", "embed"]
+        },
+        "alt": { "$ref": "#/definitions/Inlines" },
+        "url": { "type": "string" },
+        "title": { "$ref": "#/definitions/Inlines" }
+      },
+      "required": ["type", "linkType", "url"],
+      "description": "Embed a multimedia resource (image, audio, video, or embeddable content via oEmbed)."
+    },
+
+    "Symbol": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "symbol" },
+        "body": {
+          "oneOf": [
+            { "$ref": "#/definitions/Symbol" },
+            {
+              "type": "string",
+              "description": "Any Unicode character, such as an emoji or special symbol."
+            }
+          ]
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "Displays a single symbol, such as an arrow, emoji, or any Unicode character. Use a predefined symbol from the list or provide any string for custom symbols or emojis."
+    },
+
+    "Input": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "input" },
+        "solution": {
+          "type": "string",
+          "description": "The correct answer that user input will be checked against. Trailing whitespaces in the user's input will be ignored during comparison."
+        },
+        "length": {
+          "type": "integer",
+          "description": "Specifies the visible width of the input field in characters. Should be greater than or equal to the length of the solution. Optional."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "solution"],
+      "description": "An inline text input field, typically used for fill-in-the-blank (GapText) quizzes. The 'solution' property defines the correct answer."
+    },
+
+    "Select": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "select" },
+        "solution": {
+          "$ref": "#/definitions/Solution",
+          "description": "Defines the correct answer(s) for the dropdown. Can be a single integer (for one correct option), an array of integers (for multiple correct options), an empty array (if no selection is correct), or an array of booleans (where 'true' marks the correct options)."
+        },
+        "body": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Inlines" },
+          "description": "The selectable options displayed in the dropdown. Each option can be any inline element, including text, images, formulas, HTML, etc."
+        },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body", "solution"],
+      "description": "Displays a dropdown menu with selectable options, typically used for fill-in-the-blank (GapText) quizzes. The 'body' property defines the list of options, and the 'solution' property specifies which option(s) are correct."
+    },
+
     "Solution": {
       "description": "Defines the correct answer(s) for selection-based quizzes. Can be a single integer (for one correct option), an array of integers (for multiple correct options), an empty array (if no selection is correct), or an array of booleans (where 'true' marks the correct options).",
       "oneOf": [
@@ -444,22 +619,6 @@
           "description": "An array of booleans, where each 'true' value marks the corresponding option as correct."
         }
       ]
-    },
-
-    "MultimediaLink": {
-      "type": "object",
-      "properties": {
-        "type": { "const": "link" },
-        "linkType": {
-          "type": "string",
-          "enum": ["image", "audio", "video", "embed"]
-        },
-        "alt": { "$ref": "#/definitions/Inlines" },
-        "url": { "type": "string" },
-        "title": { "$ref": "#/definitions/Inlines" }
-      },
-      "required": ["type", "linkType", "url"],
-      "description": "A link to a multimedia resource (image, audio, video, or embeddable content) for use in galleries."
     },
 
     "Symbol": {

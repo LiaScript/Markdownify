@@ -2,6 +2,7 @@ module Block exposing (..)
 
 import Inline
 import Json.Decode as Json
+import Maybe exposing (withDefault)
 
 
 indentation : Json.Decoder String
@@ -173,14 +174,21 @@ typeOf id =
         "table" ->
             table |> Json.andThen addAttributes
 
-        "itemize" ->
-            Json.field "body" (Json.list element)
-                |> Json.map unorderedList
-                |> Json.andThen addAttributes
+        "list" ->
+            Json.field "ordered" Json.bool
+                |> Json.maybe
+                |> Json.map (Maybe.withDefault False)
+                |> Json.andThen
+                    (\ordered ->
+                        Json.field "body" (Json.list element)
+                            |> Json.map
+                                (if ordered then
+                                    orderedList
 
-        "enumerate" ->
-            Json.field "body" (Json.list element)
-                |> Json.map orderedList
+                                 else
+                                    unorderedList
+                                )
+                    )
                 |> Json.andThen addAttributes
 
         "code" ->
@@ -261,10 +269,10 @@ chart =
 table : Json.Decoder String
 table =
     Json.map3
-        (\head orientation rows ->
+        (\head alignment rows ->
             let
                 orient =
-                    orientation
+                    alignment
                         |> Maybe.map
                             (List.map
                                 (\o ->
@@ -299,7 +307,7 @@ table =
             |> Json.field "head"
         )
         (Json.list Json.string
-            |> Json.field "orientation"
+            |> Json.field "alignment"
             |> Json.maybe
         )
         (Json.list Inline.elements

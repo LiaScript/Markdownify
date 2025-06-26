@@ -436,11 +436,11 @@ json =
       "title": "`table`",
       "indent": 3,
       "body": [
-        "Tables are defined by a head and a row, the orientation is optional",
+        "Tables are defined by a head and a row, the alignment is optional",
         {
           "table": {
             "head": ["head 1", "head 2", [{ "bold": "head 3" }]],
-            "orientation": ["left", "right", "center"],
+            "alignment": ["left", "right", "center"],
             "rows": [
               ["1", "2", "3"],
               ["4", "5", "6"],

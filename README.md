@@ -1161,7 +1161,7 @@ Additionally it is possible to define a done list with only checked positions:
 ``` markdown
 ### `table`
 
-Tables are defined by a head and a body, the orientation is optional
+Tables are defined by a head and a body, the alignment is optional
 
 | head 1 | head 2 |    __head 3__   |
 | :---- | ------: | :-------------: |
@@ -1177,7 +1177,7 @@ Tables are defined by a head and a body, the orientation is optional
   "title": "`table`",
   "indent": 3,
   "body": [
-    "Tables are defined by a head and a body, the orientation is optional",
+    "Tables are defined by a head and a body, the alignment is optional",
     {
       "type": "table",
       "head": [
@@ -1190,7 +1190,7 @@ Tables are defined by a head and a body, the orientation is optional
           }
         ]
       ],
-      "orientation": ["left", "right", "center"],
+      "alignment": ["left", "right", "center"],
       "body": [
         [{ "type": "bold", "body": "1" }, "2", { "type": "formula", "body": "\\frac{9}{3}" }],
         ["4", "5", "6"],
@@ -1363,7 +1363,7 @@ This is a simple HTML element
               }
             ]
           ],
-          "orientation": ["left", "right", "center"],
+          "alignment": ["left", "right", "center"],
           "body": [
             [
               {

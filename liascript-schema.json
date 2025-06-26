@@ -65,7 +65,9 @@
         { "$ref": "#/definitions/ListBlock" },
         { "$ref": "#/definitions/HtmlBlock" },
         { "$ref": "#/definitions/CodeBlock" },
-        { "$ref": "#/definitions/TableBlock" }
+        { "$ref": "#/definitions/TableBlock" },
+        { "$ref": "#/definitions/TasksBlock" },
+        { "$ref": "#/definitions/QuizBlock" }
       ]
     },
 
@@ -294,13 +296,162 @@
           },
           "description": "Defines the table rows. Each row is an array of cells, and each cell can contain a string, a single inline element, or an array of inlines."
         },
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "head", "body"],
+      "description": "Displays a table with a header, optional column alignment, and a body of rows. Each cell can contain rich inline content. Additional HTML attributes can be set via 'attr' for custom styling."
+    },
+
+    "TasksBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "tasks" },
+        "body": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Inlines" },
+          "description": "An array of task descriptions. Each entry represents a single task and can contain text or rich inline content."
+        },
+        "done": {
+          "$ref": "#/definitions/Solution",
+          "description": "Defines which tasks are marked as completed. Can be a single integer (one checked), an array of integers (multiple checked), an empty array (none checked), or a boolean array (true for checked tasks)."
+        },
         "attr": {
           "type": "object",
           "description": "Optional HTML attributes for custom styling or additional properties."
         }
       },
-      "required": ["type", "head", "body"],
-      "description": "Displays a table with a header, optional column alignment, and a body of rows. Each cell can contain rich inline content. Additional HTML attributes can be set via 'attr' for custom styling."
+      "required": ["type", "body", "done"],
+      "description": "Displays a GitHub-flavored task list. Each task can contain rich inline content. The 'done' property specifies which tasks are checked."
+    },
+
+    "QuizBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "quiz" },
+        "quizType": {
+          "type": "string",
+          "enum": [
+            "input",
+            "select",
+            "single-choice",
+            "multiple-choice",
+            "gap-text"
+          ],
+          "description": "Specifies the type of quiz. Determines the interaction style and which properties are required."
+        },
+        "solution": {
+          "description": "Defines the correct answer(s) for the quiz. The format depends on the quiz type: a string for input quizzes, or a Solution object for selection-based quizzes."
+        },
+        "body": {
+          "description": "The main content or options for the quiz. For selection-based quizzes, this is an array of options. For gap-text, this is the block containing the gaps."
+        },
+        "hints": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Inlines" },
+          "description": "Optional hints to assist the user in solving the quiz."
+        },
+        "answer": {
+          "oneOf": [
+            { "$ref": "#/definitions/Block" },
+            { "$ref": "#/definitions/Blocks" }
+          ],
+          "description": "The answer or solution block(s) for the quiz. Revealed only after the user solves the quiz or requests the solution."
+        },
+        "execute": {
+          "$ref": "#/definitions/StringOrList",
+          "description": "Optional code to execute for code-based quizzes. The @input marker within the code block will be replaced with the user's input or the selected option index, allowing for custom processing."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "quizType": { "const": "input" } } },
+          "then": {
+            "required": ["type", "quizType", "solution"],
+            "properties": {
+              "solution": {
+                "type": "string",
+                "description": "The user input will be matched against this string. Trailing whitespace is ignored."
+              }
+            },
+            "description": "A quiz block presenting a single-line text input. The user's input is checked against the 'solution' string."
+          }
+        },
+        {
+          "if": { "properties": { "quizType": { "const": "select" } } },
+          "then": {
+            "required": ["type", "quizType", "solution", "body"],
+            "properties": {
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/Inlines" },
+                "description": "An array of selectable options presented in a dropdown."
+              },
+              "solution": {
+                "$ref": "#/definitions/Solution",
+                "description": "Defines the correct answer(s) for the dropdown. Can be a single integer, an array of integers, an empty array, or a boolean array."
+              }
+            },
+            "description": "A quiz block presenting a dropdown field with multiple options. The user's selection is checked against the 'solution'."
+          }
+        },
+        {
+          "if": { "properties": { "quizType": { "const": "single-choice" } } },
+          "then": {
+            "required": ["type", "quizType", "solution", "body"],
+            "properties": {
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/Inlines" },
+                "description": "An array of options presented as radio buttons."
+              },
+              "solution": {
+                "$ref": "#/definitions/Solution",
+                "description": "Defines the correct answer for the radio buttons. Should be a single integer."
+              }
+            },
+            "description": "A quiz block presenting a list of radio buttons. The user's selection is checked against the 'solution'."
+          }
+        },
+        {
+          "if": {
+            "properties": { "quizType": { "const": "multiple-choice" } }
+          },
+          "then": {
+            "required": ["type", "quizType", "solution", "body"],
+            "properties": {
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/Inlines" },
+                "description": "An array of options presented as checkboxes."
+              },
+              "solution": {
+                "$ref": "#/definitions/Solution",
+                "description": "Defines the correct answers for the checkboxes. Can be an array of integers or booleans."
+              }
+            },
+            "description": "A quiz block presenting a list of checkboxes, where multiple options can be selected. The user's selection is checked against the 'solution'."
+          }
+        },
+        {
+          "if": { "properties": { "quizType": { "const": "gap-text" } } },
+          "then": {
+            "required": ["type", "quizType", "body"],
+            "properties": {
+              "body": {
+                "oneOf": [
+                  { "$ref": "#/definitions/ParagraphBlock" },
+                  { "$ref": "#/definitions/TableBlock" },
+                  { "$ref": "#/definitions/GalleryBlock" },
+                  { "$ref": "#/definitions/QuoteBlock" }
+                ],
+                "description": "The block containing the gap(s) for fill-in-the-blank quizzes. Inline input/select elements define the gaps."
+              }
+            },
+            "description": "A quiz block presenting a gap text. No 'solution' is required, as the correct answers are defined by inline input and select elements within the body."
+          }
+        }
+      ],
+      "description": "A flexible quiz block supporting various quiz types, including text input, dropdown selection, single- and multiple-choice, and gap text. The structure and required properties depend on the selected 'quizType'. The actual quiz question should be defined in a separate block."
     },
 
     "Inlines": {

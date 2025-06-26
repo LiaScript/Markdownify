@@ -102,7 +102,10 @@ typeOf id =
             html Nothing body
 
         "link" ->
-            link False
+            link
+
+        "multimedia" ->
+            multimedia
 
         "script" ->
             map2
@@ -246,8 +249,30 @@ inputOptions =
     field "body" (list elements)
 
 
-link : Bool -> Decoder String
-link multimedia =
+link : Decoder String
+link =
+    map3
+        (\body_ url_ title_ ->
+            if String.isEmpty body_ then
+                url_
+
+            else
+                "[" ++ body_ ++ "](" ++ url_ ++ title_ ++ ")"
+        )
+        (field "body" elements
+            |> maybe
+            |> map (Maybe.withDefault "")
+        )
+        (field "url" string)
+        (field "title" elements
+            |> maybe
+            |> map (Maybe.map (\s -> " \"" ++ s ++ "\"") >> Maybe.withDefault "")
+        )
+        |> andThen addAttributes
+
+
+multimedia : Decoder String
+multimedia =
     map4
         (\link_ alt_ url_ title_ ->
             if String.isEmpty link_ && String.isEmpty alt_ then
@@ -256,18 +281,11 @@ link multimedia =
             else
                 link_ ++ "[" ++ alt_ ++ "](" ++ url_ ++ title_ ++ ")"
         )
-        (field "linkType"
+        (field "embedType"
             (string
                 |> andThen
                     (\t ->
                         case t of
-                            "link" ->
-                                if multimedia then
-                                    fail "in this context only multimedia links are supported"
-
-                                else
-                                    succeed ""
-
                             "image" ->
                                 succeed "!"
 
@@ -281,7 +299,7 @@ link multimedia =
                                 succeed "??"
 
                             _ ->
-                                fail "Only link, image, audio, video, and embed are supported"
+                                fail "Only image, audio, video, and embed are supported"
                     )
             )
         )

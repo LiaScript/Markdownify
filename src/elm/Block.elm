@@ -97,7 +97,7 @@ typeOf id =
                 |> Json.andThen addAttributes
 
         "gallery" ->
-            Json.list (Inline.link True)
+            Json.list Inline.multimedia
                 |> Json.field "body"
                 |> Json.map (String.join "\n")
                 |> Json.andThen addAttributes

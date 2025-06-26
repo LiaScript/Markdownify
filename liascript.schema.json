@@ -51,7 +51,8 @@
           { "$ref": "#/definitions/Block" },
           { "$ref": "#/definitions/Inlines" }
         ]
-      }
+      },
+      "description": "An array of block elements. For convenience and flexibility, a single inline element or a list of inlines can also be used as a block. This allows for concise markup when only a single image, video, or other inline content should be displayed as a standalone block, without requiring explicit wrapping in a block element."
     },
     "Block": {
       "oneOf": [
@@ -169,14 +170,7 @@
       "properties": {
         "type": { "const": "formula" },
         "body": {
-          "oneOf": [
-            { "type": "string" },
-            {
-              "type": "array",
-              "items": { "type": "string" },
-              "description": "Each string represents a line; all lines will be joined with a newline separator."
-            }
-          ],
+          "$ref": "#/definitions/StringOrList",
           "description": "The formula content in KaTeX syntax. Can be a single string or an array of strings (for readability); if an array, lines are joined with newlines before rendering."
         },
         "attr": { "type": "object" }
@@ -224,7 +218,7 @@
         "attr": { "type": "object" }
       },
       "required": ["type", "body"],
-      "description": "Displays a blockquote. The 'body' contains the quoted content (single block or array of blocks). If 'by' is set, the quote is rendered as a citation."
+      "description": "Displays an ordered or unordered list of block elements. The 'body' contains list entries as blocks or nested blocks."
     },
 
     "HtmlBlock": {
@@ -337,13 +331,7 @@
             "multiple-choice",
             "gap-text"
           ],
-          "description": "Specifies the type of quiz. Determines the interaction style and which properties are required."
-        },
-        "solution": {
-          "description": "Defines the correct answer(s) for the quiz. The format depends on the quiz type: a string for input quizzes, or a Solution object for selection-based quizzes."
-        },
-        "body": {
-          "description": "The main content or options for the quiz. For selection-based quizzes, this is an array of options. For gap-text, this is the block containing the gaps."
+          "description": "Specifies the type of quiz. Determines the interaction style and which properties are required. \n\n- 'input': A single-line text input where the user's answer is matched against a solution string.\n- 'select': A dropdown menu where the user selects one or more options from a list.\n- 'single-choice': A list of radio buttons where only one option can be selected.\n- 'multiple-choice': A list of checkboxes where multiple options can be selected.\n- 'gap-text': A fill-in-the-blank quiz where input/select elements are placed directly in the content."
         },
         "hints": {
           "type": "array",
@@ -362,6 +350,7 @@
           "description": "Optional code to execute for code-based quizzes. The @input marker within the code block will be replaced with the user's input or the selected option index, allowing for custom processing."
         }
       },
+      "required": ["type", "quizType"],
       "allOf": [
         {
           "if": { "properties": { "quizType": { "const": "input" } } },
@@ -384,7 +373,7 @@
               "body": {
                 "type": "array",
                 "items": { "$ref": "#/definitions/Inlines" },
-                "description": "An array of selectable options presented in a dropdown."
+                "description": "An array of selectable options presented in a dropdown menu. Each option can contain rich inline content."
               },
               "solution": {
                 "$ref": "#/definitions/Solution",
@@ -402,7 +391,7 @@
               "body": {
                 "type": "array",
                 "items": { "$ref": "#/definitions/Inlines" },
-                "description": "An array of options presented as radio buttons."
+                "description": "An array of options presented as radio buttons. Each option can contain rich inline content."
               },
               "solution": {
                 "$ref": "#/definitions/Solution",
@@ -422,7 +411,7 @@
               "body": {
                 "type": "array",
                 "items": { "$ref": "#/definitions/Inlines" },
-                "description": "An array of options presented as checkboxes."
+                "description": "An array of options presented as checkboxes. Each option can contain rich inline content."
               },
               "solution": {
                 "$ref": "#/definitions/Solution",
@@ -451,7 +440,7 @@
           }
         }
       ],
-      "description": "A flexible quiz block supporting various quiz types, including text input, dropdown selection, single- and multiple-choice, and gap text. The structure and required properties depend on the selected 'quizType'. The actual quiz question should be defined in a separate block."
+      "description": "A flexible quiz block supporting various quiz types:\n- 'input': Single-line text input matched against a solution string.\n- 'select': Dropdown menu with selectable options.\n- 'single-choice': Radio buttons for single selection.\n- 'multiple-choice': Checkboxes for multiple selections.\n- 'gap-text': Fill-in-the-blank with inline input/select elements.\n\nThe structure and required properties depend on the selected 'quizType'. The actual quiz question should be defined in a separate block."
     },
 
     "Inlines": {
@@ -479,8 +468,6 @@
         { "$ref": "#/definitions/Footnote" },
         { "$ref": "#/definitions/Formula" },
         { "$ref": "#/definitions/Symbol" },
-
-        { "$ref": "#/definitions/String" },
 
         { "$ref": "#/definitions/Link" },
         { "$ref": "#/definitions/Multimedia" },
@@ -617,17 +604,6 @@
       "description": "Use KaTeX formatted formulas in the string."
     },
 
-    "String": {
-      "type": "object",
-      "properties": {
-        "type": { "const": "formula" },
-        "body": { "type": "string" },
-        "attr": { "type": "object" }
-      },
-      "required": ["type", "body"],
-      "description": "A string tagged element, as an alternative for applying string directly."
-    },
-
     "Effect": {
       "type": "object",
       "properties": {
@@ -660,13 +636,11 @@
       "type": "object",
       "properties": {
         "type": { "const": "link" },
-        "linkType": { "const": "link" },
-
         "url": {
           "type": "string",
           "description": "The target URL for the hyperlink."
         },
-        "alt": {
+        "body": {
           "$ref": "#/definitions/Inlines",
           "description": "The link text. If omitted, the URL is shown."
         },
@@ -683,8 +657,8 @@
     "Multimedia": {
       "type": "object",
       "properties": {
-        "type": { "const": "link" },
-        "linkType": {
+        "type": { "const": "multimedia" },
+        "embedType": {
           "type": "string",
           "enum": ["image", "audio", "video", "embed"]
         },
@@ -702,7 +676,7 @@
         "type": { "const": "symbol" },
         "body": {
           "oneOf": [
-            { "$ref": "#/definitions/Symbol" },
+            { "$ref": "#/definitions/Symbols" },
             {
               "type": "string",
               "description": "Any Unicode character, such as an emoji or special symbol."
@@ -772,7 +746,7 @@
       ]
     },
 
-    "Symbol": {
+    "Symbols": {
       "type": "string",
       "enum": [
         "<-->",

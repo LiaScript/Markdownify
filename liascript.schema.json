@@ -326,12 +326,12 @@
           "type": "string",
           "enum": [
             "input",
-            "select",
+            "selection",
             "single-choice",
             "multiple-choice",
             "gap-text"
           ],
-          "description": "Specifies the type of quiz. Determines the interaction style and which properties are required. \n\n- 'input': A single-line text input where the user's answer is matched against a solution string.\n- 'select': A dropdown menu where the user selects one or more options from a list.\n- 'single-choice': A list of radio buttons where only one option can be selected.\n- 'multiple-choice': A list of checkboxes where multiple options can be selected.\n- 'gap-text': A fill-in-the-blank quiz where input/select elements are placed directly in the content."
+          "description": "Specifies the type of quiz. Determines the interaction style and which properties are required. \n\n- 'input': A single-line text input where the user's answer is matched against a solution string.\n- 'selection': A dropdown menu where the user selects one or more options from a list.\n- 'single-choice': A list of radio buttons where only one option can be selected.\n- 'multiple-choice': A list of checkboxes where multiple options can be selected.\n- 'gap-text': A fill-in-the-blank quiz where input/select elements are placed directly in the content."
         },
         "hints": {
           "type": "array",
@@ -366,7 +366,7 @@
           }
         },
         {
-          "if": { "properties": { "quizType": { "const": "select" } } },
+          "if": { "properties": { "quizType": { "const": "selection" } } },
           "then": {
             "required": ["type", "quizType", "solution", "body"],
             "properties": {
@@ -440,7 +440,7 @@
           }
         }
       ],
-      "description": "A flexible quiz block supporting various quiz types:\n- 'input': Single-line text input matched against a solution string.\n- 'select': Dropdown menu with selectable options.\n- 'single-choice': Radio buttons for single selection.\n- 'multiple-choice': Checkboxes for multiple selections.\n- 'gap-text': Fill-in-the-blank with inline input/select elements.\n\nThe structure and required properties depend on the selected 'quizType'. The actual quiz question should be defined in a separate block."
+      "description": "A flexible quiz block supporting various quiz types:\n- 'input': Single-line text input matched against a solution string.\n- 'select': Dropdown menu with selectable options.\n- 'single-choice': Radio buttons for single selection.\n- 'multiple-choice': Checkboxes for multiple selections.\n- 'gap-text': Fill-in-the-blank with inline input/select elements.\n\nThe structure and required properties depend on the selected 'quizType'. The actual quiz question should be defined in a separate block or paragraph above the quiz-block."
     },
 
     "Inlines": {

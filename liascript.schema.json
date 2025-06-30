@@ -68,7 +68,8 @@
         { "$ref": "#/definitions/Code" },
         { "$ref": "#/definitions/Table" },
         { "$ref": "#/definitions/Tasks" },
-        { "$ref": "#/definitions/Quiz" }
+        { "$ref": "#/definitions/Quiz" },
+        { "$ref": "#/definitions/Ascii" }
       ]
     },
 
@@ -441,6 +442,23 @@
         }
       ],
       "description": "A flexible quiz block supporting various quiz types:\n- 'input': Single-line text input matched against a solution string.\n- 'select': Dropdown menu with selectable options.\n- 'single-choice': Radio buttons for single selection.\n- 'multiple-choice': Checkboxes for multiple selections.\n- 'gap-text': Fill-in-the-blank with inline input/select elements.\n\nThe structure and required properties depend on the selected 'quizType'. The actual quiz question should be defined in a separate block or paragraph above the quiz-block."
+    },
+
+    "Ascii": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "Ascii" },
+        "title": {
+          "$ref": "#/definitions/inlines",
+          "description": "Image title"
+        },
+
+        "body": { "$ref": "#/definitions/StringOrList" },
+
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "This is an ASCII-art image, with support for boxes, lines, arrows, text and Unicode and emojis."
     },
 
     "inlines": {

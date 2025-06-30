@@ -31,7 +31,7 @@ const example = {
       "body": [
         "This can be either a list of Strings, that are interpreted as Markdown-blocks",
         {
-          "type": "paragraph",
+          "type": "Paragraph",
           "body": [
             "This can be predefined types of blocks, like a paragraph, which can be either a string or a set of ",
             {
@@ -78,7 +78,7 @@ The basic structure of a LiaScript-Json format is rather simple, you can either 
       "body": [
         "This can be either a list of Strings, that are interpreted as Markdown-blocks",
         {
-          "type": "paragraph",
+          "type": "Paragraph",
           "body": [
             "This can be predefined types of blocks, like a paragraph, which can be either a string or a set of ",
             {
@@ -163,23 +163,22 @@ Each block has a `type` and a `body` and an optional `attr` parameter.
 
 The `type` is a string, which defines the type of the block:
 
-- `paragraph`: Paragraphs are simple text blocks, which can contain inline elements.
-- `line`: Lines are horizontal rules that separate content.
-- `enumeration`: Enumerations are ordered lists of items.
-- `itemization`: Itemizations are unordered lists of items.
-- `quote`: Quotes are block-level citations of text.
-- `comment`: Comments are notes or annotations within the content.
-- `ascii art`: ASCII art blocks are representations of images using characters.
-- `chart`: Charts are visual representations of data.
-- `quiz`: Quizzes are interactive questions for assessment.
-- `gallery`: Galleries are collections of images or media.
-- `tasks`: Tasks are actionable items or to-do lists.
-- `table`: Tables are structured data representations.
-- `code`: Code blocks are used to display programming code or scripts.
-- `project`: Project blocks are used to represent larger initiatives or collections of tasks.
-- `html`: HTML blocks are used to include raw HTML code.
+- `Paragraph`: Paragraphs are simple text blocks, which can contain inline elements.
+- `Line`: Lines are horizontal rules that separate content.
+- `List`: Ordered or unordered lists of items.
+- `Quote`: Quotes are block-level citations of text.
+- `Comment`: Comments are notes or annotations within the content.
+- `Ascii art`: ASCII art blocks are representations of images using characters.
+- `Chart`: Charts are visual representations of data.
+- `Quiz`: Quizzes are interactive questions for assessment.
+- `Gallery`: Galleries are collections of images or media.
+- `Tasks`: Tasks are actionable items or to-do lists.
+- `Table`: Tables are structured data representations.
+- `Code`: Code blocks are used to display programming code or scripts.
+- `Project`: Project blocks are used to represent larger initiatives or collections of tasks.
+- `Html`: HTML blocks are used to include raw HTML code.
 
-The body is either a string or a list of strings, depending on the block-type a list of blocks or strings (e.g. enumerations, itemizations, quotes), which are interpreted as blocks.
+The body is either a string or a list of strings, depending on the block-type a list of blocks or strings (e.g. lists, quotes), which are interpreted as blocks.
 
 The `attr` parameter is an object that can contain additional attributes for the block, such as `style`, `id`, or other custom attributes.
 
@@ -188,7 +187,7 @@ The `attr` parameter is an object that can contain additional attributes for the
 Paragraphs are the most basic block type in LiaScript. They can be simple strings or more complex structures that include inline elements.
 
 ``` markdown
-### `paragraph`
+### `Paragraph`
 
 A paragraph is either a string,
 
@@ -200,14 +199,14 @@ but it can also__a string as well or a list ^of multiple _inline elements_^__.
 ``` json
 {
   "indent": 3,
-  "title": "`paragraph`",
+  "title": "`Paragraph`",
   "body": [
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": "A paragraph is either a string,"
     },
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         "but it can also",
         {
@@ -265,11 +264,11 @@ Lists are either ordered or unordered list. We call itemize the unordered list a
   "body": [
     "Lists are either ordered or unordered list. We call itemize the unordered list and enumerate the ordered or numbered list.",
     {
-      "type": "itemize",
+      "type": "List",
       "body": [
         "All elements of a list consist either as string ...",
         {
-          "type": "paragraph",
+          "type": "Paragraph",
           "body": "... or of different LiaScript blocks.",
           "attr": {
             "style": "color: red;"
@@ -278,11 +277,12 @@ Lists are either ordered or unordered list. We call itemize the unordered list a
         [
           "__If you need to pass multiple blocks into one list element.__",
           {
-            "type": "enumerate",
+            "type": "List",
+            "ordered": true,
             "body": [
               "Simply add a JSON-list,",
               {
-                "type": "paragraph",
+                "type": "Paragraph",
                 "body": "With multiple different Blocks."
               },
               [
@@ -324,11 +324,11 @@ and of course, lines can also be styled:
   "body": [
     "A line or a horizontal rule is a simple block element to separate blocks:",
     {
-      "type": "line"
+      "type": "Line"
     },
     "and of course, lines can also be styled:",
     {
-      "type": "line",
+      "type": "Line",
       "attr": {
         "style": "border:none; border-top: 3px dashed"
       }
@@ -340,7 +340,7 @@ and of course, lines can also be styled:
 ### Quote
 
 ``` markdown
-### `quote`
+### `Quote`
 
 > This can also be a simple string...
 
@@ -377,35 +377,35 @@ It will change the appearance of the quote to a citation.
 
 ``` json
 {
-  "title": "`quote`",
+  "title": "`Quote`",
   "indent": 3,
   "body": [
     {
-      "type": "quote",
+      "type": "Quote",
       "body": "This can also be a simple string..."
     },
     {
-      "type": "line"
+      "type": "Line"
     },
     {
-      "type": "quote",
+      "type": "Quote",
       "body": [
         "__A list of multiple strings__",
         "These are interpreted as separate blocks"
       ]
     },
     {
-      "type": "line"
+      "type": "Line"
     },
     {
-      "type": "quote",
+      "type": "Quote",
       "body": [
         {
-          "type": "paragraph",
+          "type": "Paragraph",
           "body": "Or a combination"
         },
         {
-          "type": "quote",
+          "type": "Quote",
           "body": [
             "of various different blocks",
             {
@@ -417,7 +417,7 @@ It will change the appearance of the quote to a citation.
       ]
     },
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         "It is also possible to add the origin of the quote with the parameter `by`.",
         "This can be an arbitrary string or even a block.",
@@ -425,12 +425,12 @@ It will change the appearance of the quote to a citation.
       ]
     },
     {
-      "type": "quote",
+      "type": "Quote",
       "body": "$$ E = mc^2 $$",
       "by": "Albert Einstein"
     },
     {
-      "type": "line"
+      "type": "Line"
     }
   ]
 }
@@ -439,7 +439,7 @@ It will change the appearance of the quote to a citation.
 ### Comments - TTS & Effects - Animations
 
 ``` markdown
-### `comment` & `effect`
+### `Comment` & `Effect`
 
 --{{0 Ukrainian Female}}--
 Comments in LiaScript are these parts that are spoken out loud.
@@ -488,11 +488,11 @@ Keep in mind, that effects contain further effects and comments.
 
 ``` json
 {
-  "title": "`comment` & `effect`",
+  "title": "`Comment` & `Effect`",
   "indent": 3,
   "body": [
     {
-      "type": "comment",
+      "type": "Comment",
       "body": [
         "Comments in LiaScript are these parts that are spoken out loud.",
         "They will be displayed only in `Textbook` mode.",
@@ -503,14 +503,14 @@ Keep in mind, that effects contain further effects and comments.
       "voice": "Ukrainian Female"
     },
     {
-      "type": "effect",
+      "type": "Effect",
       "start": 1,
       "body": [
         "I am a Within an effect, the start and stop parameters define, when a block shall appear."
       ]
     },
     {
-      "type": "effect",
+      "type": "Effect",
       "start": 2,
       "stop": 3,
       "body": [
@@ -525,7 +525,7 @@ Keep in mind, that effects contain further effects and comments.
       ]
     },
     {
-      "type": "comment",
+      "type": "Comment",
       "body": [
         "I will speak on animation step 1 with the default voice.",
         "And, I will be shown in `Textbook` mode below the upper effect group."
@@ -533,14 +533,14 @@ Keep in mind, that effects contain further effects and comments.
       "start": 1
     },
     {
-      "type": "effect",
+      "type": "Effect",
       "playback": true,
       "body": [
         "Setting `playback` to true, will add a button that can later be used to read this text in with the default voice."
       ]
     },
     {
-      "type": "effect",
+      "type": "Effect",
       "start": 3,
       "stop": 5,
       "voice": "UK English Male",
@@ -549,15 +549,15 @@ Keep in mind, that effects contain further effects and comments.
         "This effect shows all options, it will appear at step 3 and disappear at 5",
         "While adding a playback-button and changing the voice.",
         {
-          "type": "comment",
+          "type": "Comment",
           "start": 3,
           "body": "Keep in mind, that effects contain further effects and comments."
         },
         {
-          "type": "effect",
+          "type": "Effect",
           "start": 4,
           "body": {
-            "type": "quote",
+            "type": "Quote",
             "body": "Added quote to animations..."
           }
         }
@@ -765,7 +765,7 @@ If there are more than two options, you can also use a list as solution
   "title": "Single Choice Quiz",
   "body": [
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         [
           "What is 2+2?",
@@ -777,7 +777,7 @@ If there are more than two options, you can also use a list as solution
       ]
     },
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "single-choice",
       "body": [
         "3",
@@ -792,7 +792,7 @@ If there are more than two options, you can also use a list as solution
     },
     "If there are more than two options, you can also use a list as solution",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "single-choice",
       "body": [
         "3",
@@ -921,7 +921,7 @@ __Some Inlines__ [[damn]] some more test [[ option1 | ( option2 ) | option3 ]] s
       "type": "quiz",
       "quizType": "gap-text",
       "body": {
-        "type": "paragraph",
+        "type": "Paragraph",
         "body": [
           {
             "type": "bold",
@@ -1078,12 +1078,12 @@ A gallery is simply a collection of multimedia links
 
 ``` json
 {
-  "title": "`gallery`",
+  "title": "`Gallery`",
   "indent": 3,
   "body": [
     "A gallery is simply a collection of multimedia links",
     {
-      "type": "gallery",
+      "type": "Gallery",
       "body": [
         {
           "type": "link",
@@ -1118,7 +1118,7 @@ A gallery is simply a collection of multimedia links
 ### Tasks
 
 ``` markdown
-### `tasks`
+### `Tasks`
 
 Tasks are defined by a task and by a done list:
 
@@ -1137,12 +1137,12 @@ Additionally it is possible to define a done list with only checked positions:
 
 ``` json
 {
-  "title": "`tasks`",
+  "title": "`Tasks`",
   "indent": 3,
   "body": [
     "Tasks are defined by a task and by a done list:",
     {
-      "type": "tasks",
+      "type": "Tasks",
       "body": ["task 1", "task 2", "task 3"],
       "done": [true, false, true]
     },
@@ -1159,7 +1159,7 @@ Additionally it is possible to define a done list with only checked positions:
 ### Tables
 
 ``` markdown
-### `table`
+### `Table`
 
 Tables are defined by a head and a body, the alignment is optional
 
@@ -1174,12 +1174,12 @@ Tables are defined by a head and a body, the alignment is optional
 
 ``` json
 {
-  "title": "`table`",
+  "title": "`Table`",
   "indent": 3,
   "body": [
     "Tables are defined by a head and a body, the alignment is optional",
     {
-      "type": "table",
+      "type": "Table",
       "head": [
         "head 1",
         "head 2",
@@ -1236,7 +1236,7 @@ Tables in LiaScript are not only used for data representation, but also for visu
 The code is passed as a single string or a list of strings, language, title, and closed are optional parameters.
 
 ```` markdown
-### `code`
+### `Code`
 
 ``` javascript   -test.js
 This is a simple code block
@@ -1250,11 +1250,11 @@ for syntax highlighting
 
 ``` json
 {
-  "title": "`code`",
+  "title": "`Code`",
   "indent": 3,
   "body": [
     {
-      "type": "code",
+      "type": "Code",
       "body": [
         "This is a simple code block",
         "with multiple lines",
@@ -1292,19 +1292,20 @@ alert("Hallo Welt")
 
 ``` json
 {
-  "title": "`project`",
+  "title": "`Project`",
   "indent": 3,
   "body": [
     {
-      "type": "project",
+      "type": "Project",
       "body": [
         {
-          "type": "code",
+          "type": "Code",
           "body": ["var i = 0;"],
           "language": "javascript",
           "title": "var.js"
         },
         {
+          "type": "Code",
           "body": "alert(\"Hallo Welt\")",
           "language": "javascript",
           "title": "alert.js"
@@ -1340,15 +1341,15 @@ This is a simple HTML element
 
 ``` json
 {
-  "title": "`html`",
+  "title": "`Html`",
   "indent": 3,
   "body": [
     {
-      "type": "html",
+      "type": "Html",
       "htmlTag": "section",
       "body": [
         {
-          "type": "paragraph",
+          "type": "Paragraph",
           "body": "This is a simple HTML element"
         },
         {
@@ -1402,7 +1403,7 @@ This is a simple HTML element
       "title": "Text Formatting",
       "body": [
         {
-          "type": "paragraph",
+          "type": "Paragraph",
           "body": [
             "Basic text formatting includes: ",
             {
@@ -1443,7 +1444,7 @@ Basic text formatting includes: __bold text__, _italic text_, and ~~underlined t
   "title": "Text Decoration",
   "body": [
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         {
           "type": "strike",
@@ -1481,7 +1482,7 @@ Renders as: <del>struck through</del> and ^superscript^ and symbols like →
   "title": "Technical Elements",
   "body": [
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         "Formula: ",
         {
@@ -1566,7 +1567,7 @@ There are also links, which can be used to embed to external resources or media.
   "indent": 3,
   "body": [
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         "Effects can be inline too. This is an ordinary paragraph, with a ",
         {
@@ -1600,7 +1601,7 @@ Effects can be inline too. This is an ordinary paragraph, with a {0-5 !> UK Engl
   "indent": 3,
   "body": [
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         {
           "type": "html",
@@ -1614,7 +1615,7 @@ Effects can be inline too. This is an ordinary paragraph, with a {0-5 !> UK Engl
       ]
     },
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         {
           "type": "html",
@@ -1654,7 +1655,7 @@ Effects can be inline too. This is an ordinary paragraph, with a {0-5 !> UK Engl
   "indent": 3,
   "body": [
     {
-      "type": "paragraph",
+      "type": "Paragraph",
       "body": [
         "Scripts can be included as inline elements too, like this: ",
         {

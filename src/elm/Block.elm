@@ -26,7 +26,8 @@ elements =
 
 element : Json.Decoder String
 element =
-    [ Inline.elements
+    [ Json.string
+    , Inline.elements
     , Json.field "type" Json.string
         |> Json.andThen typeOf
     ]
@@ -180,7 +181,13 @@ typeOf id =
                 |> Json.map (Maybe.withDefault False)
                 |> Json.andThen
                     (\ordered ->
-                        Json.field "body" (Json.list element)
+                        Json.field "body"
+                            (Json.oneOf
+                                [ elements
+                                , element
+                                ]
+                                |> Json.list
+                            )
                             |> Json.map
                                 (if ordered then
                                     orderedList

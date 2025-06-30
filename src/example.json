@@ -1,294 +1,246 @@
 {
   "meta": {
-    "author": "LiaScript",
-    "version": "1.3",
-    "lang": "de"
+    "author": "Parser Test-Suite",
+    "email": "tests@example.org",
+    "language": "en",
+    "mode": "presentation",
+    "dark": true,
+    "narrator": "US English Female",
+    "custom": "any additional meta is allowed"
   },
   "sections": [
     {
-      "meta": {
-        "author": "LiaScript",
-        "email": "author@web.de"
-      },
+      "title": "Everything in one place",
       "indent": 1,
-      "title": "Base",
-      "body": "In the simplessssst cadsde, a ssssdsasfdasfdection consists of two strings for one for thes title and odne for the body. The3 indentation is a required value beessssn 0 and sssss6 sasn22222djjjj defiwness the nussmbewwr of startinwg hash-tags. For the __tieeetle__ and asdfthe __body__ elements it issasdfasd already possibjjjjhhlshhhhe to use *LiaScsript-syntax* disrectly."
-    },
-    {
-      "title": "Codee--------------------------------",
-      "indent": 2,
       "body": [
         {
-          "type": "quiz",
-          "quizType": "input",
-          "solution": "liascripsssssst",
-          "hints": ["asdfasfd", "asdfasfd"],
-          "answer": ["asdasdfasdfasfdasdf", "asdfasfdasdfafdsafsd"]
-        },
-        {
-          "type": "code",
-          "body": ["// asdfasdf", "// asdfalsdfafsd"],
-          "language": "cpp",
-          "title": "tester.cpp",
-          "execute": ["<script>", "@input", "</script>"],
-          "attr": {
-            "data-type": "none"
-          }
-        }
-      ]
-    },
-    {
-      "title": "Tables--------------------------------",
-      "indent": 2,
-      "body": [
-        {
-          "type": "table",
-          "head": ["1", "2", "3"],
+          "type": "Paragraph",
           "body": [
-            ["a", "b", "c"],
-            [
-              "a",
-              "b",
-              {
-                "type": "italic",
-                "body": "italic text",
-                "attr": "custom-style"
-              }
-            ]
-          ],
-          "attr": {
-            "data-type": "none"
-          }
-        }
-      ]
-    },
-    {
-      "title": "XXXXXXXXXXXXXXXXXX ordered list",
-      "indent": 2,
-      "body": [
-        {
-          "type": "tasks",
-          "body": ["XXXXXXXXX", "YYYYYYYYY", "dddddddd"],
-          "done": [false, false, true]
-        }
-      ]
-    },
-    {
-      "title": "ordered list",
-      "indent": 2,
-      "body": [
-        {
-          "type": "enumerate",
-          "body": [
-            "XXXXXXXXX",
-            "YYYYYYYYY",
-            {
-              "type": "quote",
-              "body": ["111111", "222222"]
-            },
-            "dddddddd"
-          ]
-        }
-      ]
-    },
-    {
-      "title": "unordered list",
-      "indent": 2,
-      "body": [
-        {
-          "type": "itemize",
-          "body": [
-            "XXXXXXXXX",
-            "YYYYYYYYY",
-            {
-              "type": "quote",
-              "body": ["111111", "222222"]
-            },
-            "dddddddd"
-          ]
-        }
-      ]
-    },
-    {
-      "title": "BlockQuote",
-      "indent": 2,
-      "body": [
-        {
-          "type": "quote",
-          "by": "asdfasfd",
-          "body": [
-            "XXXXXXXXX",
-            "YYYYYYYYY",
-            {
-              "type": "quote",
-              "body": ["111111", "222222"]
-            },
-            "dddddddd"
-          ]
-        }
-      ]
-    },
-    {
-      "meta": {
-        "author": "LiaScript",
-        "email": "author@web.de"
-      },
-      "indent": 2,
-      "title": "Paragraph",
-      "body": [
-        {
-          "type": "paragraph",
-          "body": "A paragraph can always be a simple string, that can already include __Markdown__/~LiaScript~."
-        },
-        {
-          "type": "line"
-        },
-        {
-          "type": "paragraph",
-          "body": "It is possible to attach attributes to a block, with any kind of HTML parameter for styling and more...",
-          "attr": {
-            "style": "color: red;",
-            "class": "css testing",
-            "id": "someId"
-          }
-        },
-        {
-          "type": "paragraph",
-          "body": [
-            "It is possible",
-            "ssssssssssssss",
-            {
-              "type": "input",
-              "solution": "jjjj",
-              "length": 22,
-              "attr": {
-                "style": "color: red"
-              }
-            },
-            {
-              "type": "select",
-              "solution": 1,
-              "body": [
-                "a",
-                "b",
-                "c",
-                {
-                  "type": "html",
-                  "htmlTag": "span",
-                  "attr": {
-                    "style": "color: red"
-                  },
-                  "body": ["asdfasdfas"]
-                }
-              ],
-              "attr": {
-                "style": "color: red"
-              }
-            },
-            {
-              "type": "html",
-              "htmlTag": "span",
-              "attr": {
-                "style": "color: red"
-              },
-              "body": ["asdfasdfas"]
-            },
+            "Inline demo: ",
             {
               "type": "bold",
-              "body": "bold text",
-              "attr": {
-                "class": "highlighted"
-              }
+              "body": "bold"
             },
+            ", ",
             {
               "type": "italic",
-              "body": "italic text",
-              "attr": "custom-style"
+              "body": "italic"
             },
-            {
-              "type": "formula",
-              "body": "E = mc^2",
-              "attr": {
-                "display": "block"
-              }
-            },
-            {
-              "type": "symbol",
-              "body": "→",
-              "attr": {
-                "direction": "right"
-              }
-            },
-            {
-              "type": "string",
-              "body": "plain text"
-            },
+            ", ",
             {
               "type": "strike",
-              "body": "struck through text",
-              "attr": {
-                "reason": "outdated"
-              }
+              "body": "strike"
             },
-            {
-              "type": "sup",
-              "body": "superscript",
-              "attr": null
-            },
+            ", ",
             {
               "type": "underline",
-              "body": "underlined text",
-              "attr": null
+              "body": "underline"
             },
+            ", superscript ",
             {
-              "type": "code",
-              "body": "const x = 42;",
-              "attr": {
-                "lang": "javascript"
-              }
+              "type": "sup",
+              "body": "sup"
             },
-            {
-              "type": "effect",
-              "body": "animated text",
-              "attr": null,
-              "start": 0,
-              "stop": 5,
-              "playback": true,
-              "voice": "alice"
-            },
-            {
-              "type": "footnote",
-              "body": "footnote reference",
-              "attr": {
-                "id": "fn1"
-              }
-            },
-            {
-              "type": "html",
-              "htmlTag": "div",
-              "body": "custom HTML content",
-              "attr": {
-                "class": "container"
-              }
-            },
+            ", a ",
             {
               "type": "link",
-              "linkType": "link",
-              "alt": "Link text",
-              "url": "https://example.com",
-              "title": "Hover title",
-              "attr": {
-                "target": "_blank"
-              }
+              "linkType": "external",
+              "url": "https://liascript.github.io",
+              "body": "link"
+            },
+            ", an ",
+            {
+              "type": "multimedia",
+              "linkType": "embed",
+              "embedType": "image",
+              "url": "https://placekitten.com/200/200",
+              "alt": "kitten"
+            },
+            ", an inline ",
+            {
+              "type": "code",
+              "body": "<tag>"
+            },
+            ", an inline ",
+            {
+              "type": "formula",
+              "body": "E=mc^2"
+            },
+            ", a symbol ",
+            {
+              "type": "symbol",
+              "body": ":-D"
+            },
+            ", an inline footnote",
+            {
+              "type": "footnote",
+              "body": "all good"
+            },
+            ", an inline input ",
+            {
+              "type": "input",
+              "solution": "42",
+              "length": 2
+            },
+            ", and a select ",
+            {
+              "type": "select",
+              "body": ["a", "b", "c"],
+              "solution": 1
+            },
+            "."
+          ]
+        },
+        {
+          "type": "Line"
+        },
+        {
+          "type": "Comment",
+          "start": 0,
+          "voice": "UK English Male",
+          "body": "This comment is spoken at step 0."
+        },
+        {
+          "type": "Effect",
+          "start": 1,
+          "stop": 2,
+          "playback": true,
+          "voice": "US English Female",
+          "body": {
+            "type": "Paragraph",
+            "body": "Appears at step 1, disappears at 2."
+          }
+        },
+        {
+          "type": "Gallery",
+          "body": [
+            {
+              "type": "multimedia",
+              "linkType": "embed",
+              "embedType": "image",
+              "url": "https://placebear.com/300/200",
+              "alt": "bear"
             },
             {
-              "type": "script",
-              "body": ["// comment", "console.log('Hello');"],
-              "attr": {
-                "type": "text/javascript"
-              }
+              "type": "multimedia",
+              "linkType": "embed",
+              "embedType": "video",
+              "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+              "title": "Video"
             }
           ]
+        },
+        {
+          "type": "Formula",
+          "body": ["a^2 + b^2 = c^2"]
+        },
+        {
+          "type": "Quote",
+          "body": {
+            "type": "Paragraph",
+            "body": "Imagination is more important than knowledge."
+          },
+          "by": "Albert Einstein"
+        },
+        {
+          "type": "List",
+          "ordered": true,
+          "body": [
+            {
+              "type": "Paragraph",
+              "body": "First"
+            },
+            {
+              "type": "Paragraph",
+              "body": "Second"
+            }
+          ]
+        },
+        {
+          "type": "Html",
+          "htmlTag": "div",
+          "body": {
+            "type": "Paragraph",
+            "body": "Custom HTML block"
+          },
+          "attr": {
+            "class": "border p-2"
+          }
+        },
+        {
+          "type": "Code",
+          "title": "hello.js",
+          "language": "javascript",
+          "body": [
+            "console.log('Hello World');",
+            "// multiline via StringOrList"
+          ],
+          "execute": ["// run & echo user edits", "console.log('@input');"],
+          "closed": false
+        },
+        {
+          "type": "Table",
+          "head": ["A", "B"],
+          "alignment": ["left", "center"],
+          "body": [
+            ["1", "2"],
+            ["3", "4"]
+          ]
+        },
+        {
+          "type": "Tasks",
+          "body": ["task 1", "task 2", "task 3"],
+          "done": [true, false, false]
+        },
+        {
+          "type": "Quiz",
+          "quizType": "input",
+          "solution": "lia",
+          "hints": ["lower-case only"]
+        },
+        {
+          "type": "Quiz",
+          "quizType": "selection",
+          "body": ["red", "green", "blue"],
+          "solution": 2,
+          "answer": {
+            "type": "Paragraph",
+            "body": "Blue is correct."
+          }
+        },
+        {
+          "type": "Quiz",
+          "quizType": "single-choice",
+          "body": ["1", "2", "3"],
+          "solution": 1
+        },
+        {
+          "type": "Quiz",
+          "quizType": "multiple-choice",
+          "body": ["apple", "banana", "carrot"],
+          "solution": [0, 1]
+        },
+        {
+          "type": "Quiz",
+          "quizType": "gap-text",
+          "body": {
+            "type": "Paragraph",
+            "body": [
+              "Roses are ",
+              {
+                "type": "input",
+                "solution": "red",
+                "length": 3
+              },
+              ", violets are ",
+              {
+                "type": "select",
+                "body": ["green", "blue", "yellow"],
+                "solution": 1
+              },
+              "."
+            ]
+          }
         }
       ]
     }

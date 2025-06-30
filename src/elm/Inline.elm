@@ -33,7 +33,7 @@ elements =
         , field "type" string
             |> andThen typeOf
         , Json.Decode.lazy (\_ -> list elements)
-            |> map (String.join " ")
+            |> map (String.join "")
         ]
 
 
@@ -94,7 +94,7 @@ typeOf id =
                 |> andThen addAttributes
 
         "footnote" ->
-            string
+            field "body" string
                 |> map (\key -> "[^" ++ key ++ "]")
                 |> andThen addAttributes
 

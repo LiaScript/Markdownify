@@ -56,26 +56,26 @@
     },
     "Block": {
       "oneOf": [
-        { "$ref": "#/definitions/ParagraphBlock" },
-        { "$ref": "#/definitions/LineBlock" },
-        { "$ref": "#/definitions/CommentBlock" },
-        { "$ref": "#/definitions/EffectBlock" },
-        { "$ref": "#/definitions/GalleryBlock" },
-        { "$ref": "#/definitions/FormulaBlock" },
-        { "$ref": "#/definitions/QuoteBlock" },
-        { "$ref": "#/definitions/ListBlock" },
-        { "$ref": "#/definitions/HtmlBlock" },
-        { "$ref": "#/definitions/CodeBlock" },
-        { "$ref": "#/definitions/TableBlock" },
-        { "$ref": "#/definitions/TasksBlock" },
-        { "$ref": "#/definitions/QuizBlock" }
+        { "$ref": "#/definitions/Paragraph" },
+        { "$ref": "#/definitions/Line" },
+        { "$ref": "#/definitions/Comment" },
+        { "$ref": "#/definitions/Effect" },
+        { "$ref": "#/definitions/Gallery" },
+        { "$ref": "#/definitions/Formula" },
+        { "$ref": "#/definitions/Quote" },
+        { "$ref": "#/definitions/List" },
+        { "$ref": "#/definitions/Html" },
+        { "$ref": "#/definitions/Code" },
+        { "$ref": "#/definitions/Table" },
+        { "$ref": "#/definitions/Tasks" },
+        { "$ref": "#/definitions/Quiz" }
       ]
     },
 
-    "ParagraphBlock": {
+    "Paragraph": {
       "type": "object",
       "properties": {
-        "type": { "const": "paragraph" },
+        "type": { "const": "Paragraph" },
         "body": { "$ref": "#/definitions/Inlines" },
         "attr": { "type": "object" }
       },
@@ -83,20 +83,20 @@
       "description": "A block element that displays its content as a paragraph. The 'body' can be a string, a single inline element, or an array of strings and inlines. Additional HTML attributes can be set via 'attr' for custom styling."
     },
 
-    "LineBlock": {
+    "Line": {
       "type": "object",
       "properties": {
-        "type": { "const": "line" },
+        "type": { "const": "Line" },
         "attr": { "type": "object" }
       },
       "required": ["type"],
       "description": "A horizontal line, corresponds to hr tag in html, can be styled via attr and has no body"
     },
 
-    "CommentBlock": {
+    "Comment": {
       "type": "object",
       "properties": {
-        "type": { "const": "comment" },
+        "type": { "const": "Comment" },
         "body": {
           "$ref": "#/definitions/Inlines",
           "description": "The content of the comment, which can be a string, a single inline element, or an array of strings and inlines. This text will be read aloud by the TTS engine at the specified animation step."
@@ -116,10 +116,10 @@
       "description": "A comment is a paragraph that will be read aloud by the TTS engine at a specific animation step in Presentation or Slides mode. In Textbook mode, it is rendered as visible text. Comments are typically used to narrate or explain animation steps. If multiple comments share the same 'start' value, they are read together in order of appearance."
     },
 
-    "EffectBlock": {
+    "Effect": {
       "type": "object",
       "properties": {
-        "type": { "const": "effect" },
+        "type": { "const": "Effect" },
         "body": {
           "oneOf": [
             { "$ref": "#/definitions/Block" },
@@ -150,13 +150,13 @@
       "description": "A block element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
     },
 
-    "GalleryBlock": {
+    "Gallery": {
       "type": "object",
       "properties": {
-        "type": { "const": "gallery" },
+        "type": { "const": "Gallery" },
         "body": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Multimedia" },
+          "items": { "$ref": "#/definitions/multimedia" },
           "description": "An array of multimedia links (image, audio, video, or embed) to display in the gallery."
         },
         "attr": { "type": "object" }
@@ -165,10 +165,10 @@
       "description": "Displays a gallery of media elements. The body must be an array of multimedia links."
     },
 
-    "FormulaBlock": {
+    "Formula": {
       "type": "object",
       "properties": {
-        "type": { "const": "formula" },
+        "type": { "const": "Formula" },
         "body": {
           "$ref": "#/definitions/StringOrList",
           "description": "The formula content in KaTeX syntax. Can be a single string or an array of strings (for readability); if an array, lines are joined with newlines before rendering."
@@ -179,10 +179,10 @@
       "description": "Displays a mathematical formula using KaTeX. The body can be a single string or an array of strings for multi-line formulas."
     },
 
-    "QuoteBlock": {
+    "Quote": {
       "type": "object",
       "properties": {
-        "type": { "const": "quote" },
+        "type": { "const": "Quote" },
         "body": {
           "oneOf": [
             { "$ref": "#/definitions/Block" },
@@ -200,10 +200,10 @@
       "description": "Displays a blockquote. The 'body' contains the quoted content (single block or array of blocks). If 'by' is set, the quote is rendered as a citation."
     },
 
-    "ListBlock": {
+    "List": {
       "type": "object",
       "properties": {
-        "type": { "const": "list" },
+        "type": { "const": "List" },
         "body": {
           "oneOf": [
             { "$ref": "#/definitions/Block" },
@@ -221,10 +221,10 @@
       "description": "Displays an ordered or unordered list of block elements. The 'body' contains list entries as blocks or nested blocks."
     },
 
-    "HtmlBlock": {
+    "Html": {
       "type": "object",
       "properties": {
-        "type": { "const": "html" },
+        "type": { "const": "Html" },
         "htmlTag": {
           "type": "string",
           "description": "Define an inline html tag name like div, span, etc."
@@ -241,10 +241,10 @@
       "description": "In contrast to an html inline element, this body can contain entire Block elements."
     },
 
-    "CodeBlock": {
+    "Code": {
       "type": "object",
       "properties": {
-        "type": { "const": "code" },
+        "type": { "const": "Code" },
         "title": { "type": "string", "description": "A filename" },
         "language": {
           "type": "string",
@@ -265,10 +265,10 @@
       "description": "This will show an entire code block with syntax highlighting and an optional title. The execute field will turn the code-block into an editor with a run button that will execute the code."
     },
 
-    "TableBlock": {
+    "Table": {
       "type": "object",
       "properties": {
-        "type": { "const": "table" },
+        "type": { "const": "Table" },
         "head": {
           "type": "array",
           "items": { "$ref": "#/definitions/Inlines" },
@@ -296,10 +296,10 @@
       "description": "Displays a table with a header, optional column alignment, and a body of rows. Each cell can contain rich inline content. Additional HTML attributes can be set via 'attr' for custom styling."
     },
 
-    "TasksBlock": {
+    "Tasks": {
       "type": "object",
       "properties": {
-        "type": { "const": "tasks" },
+        "type": { "const": "Tasks" },
         "body": {
           "type": "array",
           "items": { "$ref": "#/definitions/Inlines" },
@@ -318,10 +318,10 @@
       "description": "Displays a GitHub-flavored task list. Each task can contain rich inline content. The 'done' property specifies which tasks are checked."
     },
 
-    "QuizBlock": {
+    "Quiz": {
       "type": "object",
       "properties": {
-        "type": { "const": "quiz" },
+        "type": { "const": "Quiz" },
         "quizType": {
           "type": "string",
           "enum": [
@@ -428,10 +428,10 @@
             "properties": {
               "body": {
                 "oneOf": [
-                  { "$ref": "#/definitions/ParagraphBlock" },
-                  { "$ref": "#/definitions/TableBlock" },
-                  { "$ref": "#/definitions/GalleryBlock" },
-                  { "$ref": "#/definitions/QuoteBlock" }
+                  { "$ref": "#/definitions/Paragraph" },
+                  { "$ref": "#/definitions/Table" },
+                  { "$ref": "#/definitions/Gallery" },
+                  { "$ref": "#/definitions/Quote" }
                 ],
                 "description": "The block containing the gap(s) for fill-in-the-blank quizzes. Inline input/select elements define the gaps."
               }
@@ -455,31 +455,31 @@
 
     "Inline": {
       "oneOf": [
-        { "$ref": "#/definitions/Bold" },
-        { "$ref": "#/definitions/Italic" },
-        { "$ref": "#/definitions/Strike" },
+        { "$ref": "#/definitions/bold" },
+        { "$ref": "#/definitions/italic" },
+        { "$ref": "#/definitions/strike" },
 
-        { "$ref": "#/definitions/Sup" },
-        { "$ref": "#/definitions/Underline" },
-        { "$ref": "#/definitions/Effect" },
-        { "$ref": "#/definitions/Html" },
-        { "$ref": "#/definitions/Script" },
-        { "$ref": "#/definitions/Code" },
-        { "$ref": "#/definitions/Footnote" },
-        { "$ref": "#/definitions/Formula" },
-        { "$ref": "#/definitions/Symbol" },
+        { "$ref": "#/definitions/sup" },
+        { "$ref": "#/definitions/underline" },
+        { "$ref": "#/definitions/effect" },
+        { "$ref": "#/definitions/html" },
+        { "$ref": "#/definitions/script" },
+        { "$ref": "#/definitions/code" },
+        { "$ref": "#/definitions/footnote" },
+        { "$ref": "#/definitions/formula" },
+        { "$ref": "#/definitions/symbol" },
 
-        { "$ref": "#/definitions/Link" },
-        { "$ref": "#/definitions/Multimedia" },
+        { "$ref": "#/definitions/link" },
+        { "$ref": "#/definitions/multimedia" },
 
-        { "$ref": "#/definitions/Input" },
-        { "$ref": "#/definitions/Select" },
+        { "$ref": "#/definitions/input" },
+        { "$ref": "#/definitions/select" },
 
         { "type": "string" }
       ]
     },
 
-    "Bold": {
+    "bold": {
       "type": "object",
       "properties": {
         "type": { "const": "bold" },
@@ -490,7 +490,7 @@
       "description": "An inline element that displays its content in bold. --> __bold text__"
     },
 
-    "Italic": {
+    "italic": {
       "type": "object",
       "properties": {
         "type": { "const": "italic" },
@@ -501,7 +501,7 @@
       "description": "Displays the contained elements in italic text. --> _italic text_"
     },
 
-    "Strike": {
+    "strike": {
       "type": "object",
       "properties": {
         "type": { "const": "strike" },
@@ -512,7 +512,7 @@
       "description": "Displays the contained elements with a strikethrough (crossed out). --> ~striked text~"
     },
 
-    "Sup": {
+    "sup": {
       "type": "object",
       "properties": {
         "type": { "const": "sup" },
@@ -523,7 +523,7 @@
       "description": "Displays the contained elements as superscript (raised text). --> ^bold text^"
     },
 
-    "Underline": {
+    "underline": {
       "type": "object",
       "properties": {
         "type": { "const": "underline" },
@@ -534,7 +534,7 @@
       "description": "Displays the contained elements with an underline. --> ~~underlined text~~"
     },
 
-    "Html": {
+    "html": {
       "type": "object",
       "properties": {
         "type": { "const": "html" },
@@ -549,7 +549,7 @@
       "description": "Displays an inline HTML element that might contain further inline elements, parameters are defined in attr."
     },
 
-    "Script": {
+    "script": {
       "type": "object",
       "properties": {
         "type": { "const": "script" },
@@ -570,7 +570,7 @@
       "description": "Create a script tag with code from the body. The body can be a single string or an array of strings (joined with newlines for readability)."
     },
 
-    "Code": {
+    "code": {
       "type": "object",
       "properties": {
         "type": { "const": "code" },
@@ -582,7 +582,7 @@
       "description": "Display a verbatim element, the body will be displayed as it is."
     },
 
-    "Footnote": {
+    "footnote": {
       "type": "object",
       "properties": {
         "type": { "const": "footnote" },
@@ -593,7 +593,7 @@
       "description": "Add a reference to a footnote block element."
     },
 
-    "Formula": {
+    "formula": {
       "type": "object",
       "properties": {
         "type": { "const": "formula" },
@@ -604,7 +604,7 @@
       "description": "Use KaTeX formatted formulas in the string."
     },
 
-    "Effect": {
+    "effect": {
       "type": "object",
       "properties": {
         "type": { "const": "effect" },
@@ -632,7 +632,7 @@
       "description": "An inline element that animates its content to appear and/or disappear at specific steps in a slide. Optionally, a TTS playback button can be added, and a custom voice can be set for spoken output."
     },
 
-    "Link": {
+    "link": {
       "type": "object",
       "properties": {
         "type": { "const": "link" },
@@ -654,7 +654,7 @@
       "description": "Specifies a hyperlink"
     },
 
-    "Multimedia": {
+    "multimedia": {
       "type": "object",
       "properties": {
         "type": { "const": "multimedia" },
@@ -670,13 +670,13 @@
       "description": "Embed a multimedia resource (image, audio, video, or embeddable content via oEmbed)."
     },
 
-    "Symbol": {
+    "symbol": {
       "type": "object",
       "properties": {
         "type": { "const": "symbol" },
         "body": {
           "oneOf": [
-            { "$ref": "#/definitions/Symbols" },
+            { "$ref": "#/definitions/symbols" },
             {
               "type": "string",
               "description": "Any Unicode character, such as an emoji or special symbol."
@@ -689,7 +689,7 @@
       "description": "Displays a single symbol, such as an arrow, emoji, or any Unicode character. Use a predefined symbol from the list or provide any string for custom symbols or emojis."
     },
 
-    "Input": {
+    "input": {
       "type": "object",
       "properties": {
         "type": { "const": "input" },
@@ -707,7 +707,7 @@
       "description": "An inline text input field, typically used for fill-in-the-blank (GapText) quizzes. The 'solution' property defines the correct answer."
     },
 
-    "Select": {
+    "select": {
       "type": "object",
       "properties": {
         "type": { "const": "select" },
@@ -746,7 +746,7 @@
       ]
     },
 
-    "Symbols": {
+    "symbols": {
       "type": "string",
       "enum": [
         "<-->",

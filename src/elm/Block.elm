@@ -59,14 +59,14 @@ body =
 typeOf : String -> Json.Decoder String
 typeOf id =
     case id of
-        "paragraph" ->
+        "Paragraph" ->
             Json.field "body" Inline.elements
                 |> Json.andThen addAttributes
 
-        "line" ->
+        "Line" ->
             addAttributes "---"
 
-        "comment" ->
+        "Comment" ->
             Json.map3
                 (\start voice text ->
                     "--{{"
@@ -96,19 +96,19 @@ typeOf id =
                 (Json.field "body" Inline.elements)
                 |> Json.andThen addAttributes
 
-        "gallery" ->
+        "Gallery" ->
             Json.list Inline.multimedia
                 |> Json.field "body"
                 |> Json.map (String.join "\n")
                 |> Json.andThen addAttributes
 
-        "formula" ->
+        "Formula" ->
             Inline.stringOrList
                 |> Json.field "body"
                 |> Json.map (\f -> "$$ " ++ f ++ " $$")
                 |> Json.andThen addAttributes
 
-        "effect" ->
+        "Effect" ->
             Json.oneOf
                 [ element
                     |> Json.field "body"
@@ -158,23 +158,23 @@ typeOf id =
                 ]
                 |> Json.andThen addAttributes
 
-        "quote" ->
+        "Quote" ->
             quote
                 |> Json.andThen addAttributes
 
-        "html" ->
+        "Html" ->
             Inline.html (Just "\n\n") body
 
-        "ascii" ->
+        "Ascii" ->
             asciiArt |> Json.andThen addAttributes
 
-        "chart" ->
+        "Chart" ->
             chart |> Json.andThen addAttributes
 
-        "table" ->
+        "Table" ->
             table |> Json.andThen addAttributes
 
-        "list" ->
+        "List" ->
             Json.field "ordered" Json.bool
                 |> Json.maybe
                 |> Json.map (Maybe.withDefault False)
@@ -191,7 +191,7 @@ typeOf id =
                     )
                 |> Json.andThen addAttributes
 
-        "code" ->
+        "Code" ->
             Json.map2
                 (\c e ->
                     if String.isEmpty e then
@@ -204,13 +204,13 @@ typeOf id =
                 execute
                 |> Json.andThen addAttributes
 
-        "project" ->
+        "Project" ->
             project |> Json.andThen addAttributes
 
-        "tasks" ->
+        "Tasks" ->
             tasks |> Json.andThen addAttributes
 
-        "quiz" ->
+        "Quiz" ->
             quiz |> Json.andThen addAttributes
 
         _ ->
@@ -237,7 +237,7 @@ quote =
                     Just author ->
                         quote_ ++ "\n\n-- " ++ author
         )
-        (Json.field "body" elements)
+        (Json.field "body" (Json.oneOf [ element, elements ]))
         (Json.field "by" elements |> Json.maybe)
 
 
@@ -425,7 +425,15 @@ execute =
         |> Json.field "execute"
         |> Json.map (\s -> "\n" ++ s)
         |> Json.maybe
-        |> Json.map (Maybe.withDefault "")
+        |> Json.map
+            (\s ->
+                case s of
+                    Nothing ->
+                        ""
+
+                    Just s_ ->
+                        "<script>" ++ s_ ++ "\n</script>"
+            )
 
 
 tasks : Json.Decoder String

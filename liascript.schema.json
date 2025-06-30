@@ -49,7 +49,7 @@
       "items": {
         "oneOf": [
           { "$ref": "#/definitions/Block" },
-          { "$ref": "#/definitions/Inlines" }
+          { "$ref": "#/definitions/inlines" }
         ]
       },
       "description": "An array of block elements. For convenience and flexibility, a single inline element or a list of inlines can also be used as a block. This allows for concise markup when only a single image, video, or other inline content should be displayed as a standalone block, without requiring explicit wrapping in a block element."
@@ -76,7 +76,7 @@
       "type": "object",
       "properties": {
         "type": { "const": "Paragraph" },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "attr": { "type": "object" }
       },
       "required": ["type", "body"],
@@ -98,7 +98,7 @@
       "properties": {
         "type": { "const": "Comment" },
         "body": {
-          "$ref": "#/definitions/Inlines",
+          "$ref": "#/definitions/inlines",
           "description": "The content of the comment, which can be a string, a single inline element, or an array of strings and inlines. This text will be read aloud by the TTS engine at the specified animation step."
         },
         "start": {
@@ -191,7 +191,7 @@
           "description": "The quoted content. Can be a single block or an array of blocks."
         },
         "by": {
-          "$ref": "#/definitions/Inlines",
+          "$ref": "#/definitions/inlines",
           "description": "Optional. If provided, displays the quote as a citation with the given author or source."
         },
         "attr": { "type": "object" }
@@ -271,7 +271,7 @@
         "type": { "const": "Table" },
         "head": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Inlines" },
+          "items": { "$ref": "#/definitions/inlines" },
           "description": "Defines the table header. Each entry represents the content of a column header and can be a string, a single inline element, or an array of inlines."
         },
         "alignment": {
@@ -286,7 +286,7 @@
           "type": "array",
           "items": {
             "type": "array",
-            "items": { "$ref": "#/definitions/Inlines" }
+            "items": { "$ref": "#/definitions/inlines" }
           },
           "description": "Defines the table rows. Each row is an array of cells, and each cell can contain a string, a single inline element, or an array of inlines."
         },
@@ -302,7 +302,7 @@
         "type": { "const": "Tasks" },
         "body": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Inlines" },
+          "items": { "$ref": "#/definitions/inlines" },
           "description": "An array of task descriptions. Each entry represents a single task and can contain text or rich inline content."
         },
         "done": {
@@ -335,7 +335,7 @@
         },
         "hints": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Inlines" },
+          "items": { "$ref": "#/definitions/inlines" },
           "description": "Optional hints to assist the user in solving the quiz."
         },
         "answer": {
@@ -372,7 +372,7 @@
             "properties": {
               "body": {
                 "type": "array",
-                "items": { "$ref": "#/definitions/Inlines" },
+                "items": { "$ref": "#/definitions/inlines" },
                 "description": "An array of selectable options presented in a dropdown menu. Each option can contain rich inline content."
               },
               "solution": {
@@ -390,7 +390,7 @@
             "properties": {
               "body": {
                 "type": "array",
-                "items": { "$ref": "#/definitions/Inlines" },
+                "items": { "$ref": "#/definitions/inlines" },
                 "description": "An array of options presented as radio buttons. Each option can contain rich inline content."
               },
               "solution": {
@@ -410,7 +410,7 @@
             "properties": {
               "body": {
                 "type": "array",
-                "items": { "$ref": "#/definitions/Inlines" },
+                "items": { "$ref": "#/definitions/inlines" },
                 "description": "An array of options presented as checkboxes. Each option can contain rich inline content."
               },
               "solution": {
@@ -443,17 +443,17 @@
       "description": "A flexible quiz block supporting various quiz types:\n- 'input': Single-line text input matched against a solution string.\n- 'select': Dropdown menu with selectable options.\n- 'single-choice': Radio buttons for single selection.\n- 'multiple-choice': Checkboxes for multiple selections.\n- 'gap-text': Fill-in-the-blank with inline input/select elements.\n\nThe structure and required properties depend on the selected 'quizType'. The actual quiz question should be defined in a separate block or paragraph above the quiz-block."
     },
 
-    "Inlines": {
+    "inlines": {
       "oneOf": [
         {
           "type": "array",
-          "items": { "$ref": "#/definitions/Inline" }
+          "items": { "$ref": "#/definitions/inline" }
         },
-        { "$ref": "#/definitions/Inline" }
+        { "$ref": "#/definitions/inline" }
       ]
     },
 
-    "Inline": {
+    "inline": {
       "oneOf": [
         { "$ref": "#/definitions/bold" },
         { "$ref": "#/definitions/italic" },
@@ -483,7 +483,7 @@
       "type": "object",
       "properties": {
         "type": { "const": "bold" },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "attr": { "type": "object" }
       },
       "required": ["type", "body"],
@@ -494,7 +494,7 @@
       "type": "object",
       "properties": {
         "type": { "const": "italic" },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "attr": { "type": "object" }
       },
       "required": ["type", "body"],
@@ -505,7 +505,7 @@
       "type": "object",
       "properties": {
         "type": { "const": "strike" },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "attr": { "type": "object" }
       },
       "required": ["type", "body"],
@@ -516,7 +516,7 @@
       "type": "object",
       "properties": {
         "type": { "const": "sup" },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "attr": { "type": "object" }
       },
       "required": ["type", "body"],
@@ -527,7 +527,7 @@
       "type": "object",
       "properties": {
         "type": { "const": "underline" },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "attr": { "type": "object" }
       },
       "required": ["type", "body"],
@@ -542,7 +542,7 @@
           "type": "string",
           "description": "Define an inline html tag name like div, span, etc."
         },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "attr": { "type": "object" }
       },
       "required": ["type", "htmlTag"],
@@ -608,7 +608,7 @@
       "type": "object",
       "properties": {
         "type": { "const": "effect" },
-        "body": { "$ref": "#/definitions/Inlines" },
+        "body": { "$ref": "#/definitions/inlines" },
         "start": {
           "type": "integer",
           "minimum": 0,
@@ -641,11 +641,11 @@
           "description": "The target URL for the hyperlink."
         },
         "body": {
-          "$ref": "#/definitions/Inlines",
+          "$ref": "#/definitions/inlines",
           "description": "The link text. If omitted, the URL is shown."
         },
         "title": {
-          "$ref": "#/definitions/Inlines",
+          "$ref": "#/definitions/inlines",
           "description": "A title or tooltip for the link. Optional."
         },
         "attr": { "type": "object" }
@@ -662,9 +662,9 @@
           "type": "string",
           "enum": ["image", "audio", "video", "embed"]
         },
-        "alt": { "$ref": "#/definitions/Inlines" },
+        "alt": { "$ref": "#/definitions/inlines" },
         "url": { "type": "string" },
-        "title": { "$ref": "#/definitions/Inlines" }
+        "title": { "$ref": "#/definitions/inlines" }
       },
       "required": ["type", "linkType", "url"],
       "description": "Embed a multimedia resource (image, audio, video, or embeddable content via oEmbed)."
@@ -717,7 +717,7 @@
         },
         "body": {
           "type": "array",
-          "items": { "$ref": "#/definitions/Inlines" },
+          "items": { "$ref": "#/definitions/inlines" },
           "description": "The selectable options displayed in the dropdown. Each option can be any inline element, including text, images, formulas, HTML, etc."
         },
         "attr": { "type": "object" }

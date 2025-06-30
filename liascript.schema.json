@@ -69,7 +69,8 @@
         { "$ref": "#/definitions/Table" },
         { "$ref": "#/definitions/Tasks" },
         { "$ref": "#/definitions/Quiz" },
-        { "$ref": "#/definitions/Ascii" }
+        { "$ref": "#/definitions/Ascii" },
+        { "$ref": "#/definitions/Chart" }
       ]
     },
 
@@ -459,6 +460,19 @@
       },
       "required": ["type", "body"],
       "description": "This is an ASCII-art image, with support for boxes, lines, arrows, text and Unicode and emojis."
+    },
+
+    "Chart": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "Chart" },
+
+        "body": { "$ref": "#/definitions/StringOrList" },
+
+        "attr": { "type": "object" }
+      },
+      "required": ["type", "body"],
+      "description": "This is a special type of diagram drawn as an ASCII art with points x an y axes and values in form of +,*,#,a,b,c, ...."
     },
 
     "inlines": {

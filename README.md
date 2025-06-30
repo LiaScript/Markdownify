@@ -617,7 +617,7 @@ Keep in mind, that effects contain further effects and comments.
 ### Charts
 
 ``` markdown
-### `chart`
+### `Chart`
 
                                 diagram title       
     1.5 |           *                     (* stars) 
@@ -637,11 +637,11 @@ Keep in mind, that effects contain further effects and comments.
 
 ``` json
 {
-  "title": "`chart`",
+  "title": "`Chart`",
   "indent": 3,
   "body": [
     {
-      "type": "chart",
+      "type": "Chart",
       "body": [
         "                            diagram title       ",
         "1.5 |           *                     (* stars) ",
@@ -684,7 +684,7 @@ What did the fish say, when he hit the wall?
   "body": [
     "What did the fish say, when he hit the wall?",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "input",
       "solution": "dam"
     }
@@ -712,7 +712,7 @@ What is the color of the nature?
   "body": [
     "What is the color of the nature?",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "selection",
       "body": [
         "red",
@@ -807,7 +807,7 @@ If there are more than two options, you can also use a list as solution
     },
     "... or a list of boolean values",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "single-choice",
       "body": [
         "3",
@@ -846,7 +846,7 @@ Which of these is a scripting language?
   "body": [
     "Which of these is a scripting language?",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "multiple-choice",
       "body": ["JavaScript", "Python", "Java", "C++"],
       "solution": [0, 1]
@@ -877,7 +877,7 @@ Question...
   "body": [
     "Question...",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "matrix",
       "head": ["Strong", "Weak", "None"],
       "body": [
@@ -918,7 +918,7 @@ __Some Inlines__ [[damn]] some more test [[ option1 | ( option2 ) | option3 ]] s
   "body": [
     "What did the fish say, when he hit the wall?",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "gap-text",
       "body": {
         "type": "Paragraph",
@@ -985,7 +985,7 @@ or if the user clicks onto the resolve button.
     "The solution is defined by its position in the option list...",
     "... But, as there are multiple options, you can define also multiple solutions too.",
     {
-      "type": "quiz",
+      "type": "Quiz",
       "quizType": "selection",
       "solution": [0, 2],
       "body": [
@@ -1277,7 +1277,7 @@ Additionally it is possible to add an appendix, which is either a script or a ma
 
 
 ```` markdown
-### `project`
+### `Project`
 
 ``` javascript   var.js
 var i = 0;
@@ -1322,7 +1322,7 @@ alert("Hallo Welt")
 HTML on the block level is used to include raw HTML code into the LiaScript document. It works slightly different than the inline HTML. Inline HTML can only contain inline elements, while block-level HTML can contain any blocks and inline elements, which will be separated by empty lines, including paragraphs, tables, and other block-level elements.
 
 ``` markdown
-### `html`
+### `Html`
 
 <section "style"="color: red;">
 
@@ -1353,7 +1353,7 @@ This is a simple HTML element
           "body": "This is a simple HTML element"
         },
         {
-          "type": "table",
+          "type": "Table",
           "head": [
             "head 1",
             "head 2",
@@ -1508,9 +1508,9 @@ Renders as
 Formula: $ E = mc^2 $ and code: `const x = 42;`
 ```
 
-### Links & Media
+### Links & Multimedia
 
-There are also links, which can be used to embed to external resources or media.
+There are also links and multimedia embeddings, which can be used to embed to external resources.
 
 ``` json
 {
@@ -1519,26 +1519,57 @@ There are also links, which can be used to embed to external resources or media.
   "body": [
     {
       "type": "link",
-      "linkType": "image",
+      "url": "https://liascript.github.io/LiveEditor"
+    },
+    {
+      "type": "link",
+      "url": "https://liascript.github.io/LiveEditor",
+      "title": "More and optional information."
+    },
+    {
+      "type": "link",
+      "url": "https://liascript.github.io/LiveEditor",
+      "body": "LiaScript Live-Editor"
+    },
+    {
+      "type": "link",
+      "url": "https://liascript.github.io/LiveEditor",
+      "body": "LiaScript Live-Editor",
+      "title": "More and optional information."
+    }
+  ]
+}
+```
+
+---
+
+``` json
+{
+  "title": "`multimedia`",
+  "indent": 3,
+  "body": [
+    {
+      "type": "multimedia",
+      "embedType": "image",
       "url": "https://liascript.github.io/img/LiveEditor.jpg",
       "alt": "LiaScript Live-Editor",
       "title": "More and optional information."
     },
     {
-      "type": "link",
-      "linkType": "audio",
+      "type": "multimedia",
+      "linembedTypekType": "audio",
       "url": "https://soundcloud.com/magnetic-magazine/magnetics-elm-podcast-one-more",
       "alt": "Magnetic's ELM Podcast: One More Summer Sun"
     },
     {
-      "type": "link",
-      "linkType": "video",
+      "type": "multimedia",
+      "embedType": "video",
       "url": "https://www.youtube.com/watch?v=q_Usix3nyGA",
       "alt": "Some random video"
     },
     {
-      "type": "link",
-      "linkType": "embed",
+      "type": "multimedia",
+      "embedType": "embed",
       "url": "https://falstad.com/circuit/circuitjs.html"
     }
   ]
@@ -1548,7 +1579,7 @@ There are also links, which can be used to embed to external resources or media.
 `image` links are used to embed images, `audio` links for audio files, `video` links for videos, and `embed` links for any other types of content.
 
 ``` markdown
-### `link`
+### `multimedia`
 
 ![LiaScript Live-Editor](https://liascript.github.io/img/LiveEditor.jpg "More and optional information.")
 

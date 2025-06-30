@@ -668,7 +668,7 @@
         },
         "attr": { "type": "object" }
       },
-      "required": ["type", "linkType", "url"],
+      "required": ["type", "url"],
       "description": "Specifies a hyperlink"
     },
 
@@ -684,7 +684,7 @@
         "url": { "type": "string" },
         "title": { "$ref": "#/definitions/inlines" }
       },
-      "required": ["type", "linkType", "url"],
+      "required": ["type", "embedType", "url"],
       "description": "Embed a multimedia resource (image, audio, video, or embeddable content via oEmbed)."
     },
 

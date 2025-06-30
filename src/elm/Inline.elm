@@ -1,6 +1,7 @@
 module Inline exposing (..)
 
 import Dict
+import Html.Attributes exposing (title)
 import Json.Decode
     exposing
         ( Decoder
@@ -253,11 +254,18 @@ link : Decoder String
 link =
     map3
         (\body_ url_ title_ ->
-            if String.isEmpty body_ then
-                url_
+            case ( body_, title_ ) of
+                ( "", "" ) ->
+                    url_
 
-            else
-                "[" ++ body_ ++ "](" ++ url_ ++ title_ ++ ")"
+                ( _, "" ) ->
+                    "[" ++ body_ ++ "](" ++ url_ ++ ")"
+
+                ( "", _ ) ->
+                    "[" ++ url_ ++ "](" ++ url_ ++ title_ ++ ")"
+
+                _ ->
+                    "[" ++ body_ ++ "](" ++ url_ ++ title_ ++ ")"
         )
         (field "body" elements
             |> maybe

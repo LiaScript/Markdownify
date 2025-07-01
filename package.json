@@ -1,12 +1,13 @@
 {
   "name": "@liascript/markdownify",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Create LiaScript documents from a common JSON-model",
-  "module": "dist/lib.js",
-  "types": "dist/lib.d.ts",
+  "module": "dist/markdownify.js",
+  "types": "dist/markdownify.d.ts",
   "scripts": {
-    "watch": "npx parcel serve src/demo.html --open",
-    "build": "npx parcel build src/lib.ts"
+    "watch": "npx parcel serve src/index.html --open",
+    "build": "rm -rf dist && npx parcel build src/markdownify.ts",
+    "docs": "npx parcel build src/index.html --dist-dir docs --public-url ./"
   },
   "keywords": [
     "LiaScript",

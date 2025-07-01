@@ -17,7 +17,7 @@ Currently there is only one function that takes as an input-parameter either a s
 
 
 ``` typescript
-import liascriptify from './node_modules/@liascript/markdownify/dist/lib'
+import liascriptify from './node_modules/@liascript/markdownify/dist/markdownify'
 
 const example = {
   "meta": {

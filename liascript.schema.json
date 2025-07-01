@@ -1,34 +1,87 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/LiaScript/Markdownify/refs/heads/main/liascript.schema.json",
   "title": "LiaScript Document",
+  "$comment": "This is the **original** LiaScript JSON‑Schema enriched only with additional `description`, `examples`, and `$comment` annotations so that generative AI systems can more easily understand the intent and capabilities of LiaScript. **No structural validation rules were changed** – every extra field added here is purely documentary.",
+
   "type": "object",
   "properties": {
     "meta": {
       "type": "object",
+      "description": "Document‑level metadata injected via the `<!-- meta: ... -->` macro at the very top of a LiaScript file. Unknown keys are permitted and simply forwarded to the runtime, which allows custom macros and future extensions.",
+      "$comment": "Typical extra keys include `scripts`, `css`, `imports`, and `macros`. These are not validated explicitly here because LiaScript intentionally keeps the meta block open‑ended, but AIs SHOULD know they exist and feel free to emit them.",
       "properties": {
-        "author": { "type": "string" },
-        "email": { "type": "string" },
-        "language": { "type": "string" },
-        "mode": { "type": "string" },
-        "dark": { "type": "boolean" },
-        "narrator": { "type": "string" }
+        "author": {
+          "type": "string",
+          "description": "Primary author or authors. Multiple names can be separated by comma or semicolon."
+        },
+        "email": {
+          "type": "string",
+          "description": "Contact e‑mail address shown in the about dialog and exported into ePub metadata."
+        },
+        "language": {
+          "type": "string",
+          "description": "ISO‑639‑1 language code (e.g. `en`, `de`, `es`)."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["Presentation", "Textbook", "Slides"],
+          "description": "Preferred presentation mode, otherwise the default user mode is used."
+        },
+        "dark": {
+          "type": "boolean",
+          "description": "Force dark theme regardless of viewer preference or auto‑detection."
+        },
+        "narrator": {
+          "@ref": "#/definitions/Voice",
+          "description": "Default TTS voice (see the `Voice` enum)."
+        }
       },
+      "examples": [
+        {
+          "author": "Ada Lovelace; Alan Turing",
+          "email": "course@example.org",
+          "language": "en",
+          "mode": "slides",
+          "scripts": ["https://example.org/3d-panorama.js"],
+          "css": ["https://example.org/theme-dark.css"],
+          "imports": [
+            "https://raw.githubusercontent.com/LiaTemplates/CodeRunner/master/README.md"
+          ]
+        }
+      ],
       "additionalProperties": true
     },
+
     "sections": {
       "type": "array",
       "items": { "$ref": "#/definitions/section" }
     }
   },
+
   "required": ["sections"],
+
+  "$comment": "------------------------------------------------------------\nATTR FIELD\n------------------------------------------------------------\nEvery Block or inline element MAY contain an `attr` object. It is passed straight through to the resulting HTML tag, so any valid attribute name is accepted. Common examples include: \n  { \"id\": \"hero\", \"class\": [\"center\", \"fade-in\"], \"style\": \"color:#e91e63;\", \"data-step\": 3 }.\nLLMs should treat `attr` as a free‑form bag of key/value pairs for styling, ARIA roles, data‑attributes, etc.",
+
   "definitions": {
     "section": {
       "type": "object",
       "properties": {
-        "title": { "type": "string" },
-        "indent": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "title": {
+          "type": "string",
+          "description": "Section heading (Markdown line starting with one or more `#`)."
+        },
+        "indent": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Heading level depth. Courses usually start at 1."
+        },
         "body": { "$ref": "#/definitions/Blocks" },
-        "meta": { "type": "object" }
+        "meta": {
+          "type": "object",
+          "description": "Local overrides for narrator, author, etc. Same structure as the top‑level meta block."
+        }
       },
       "required": ["title", "indent", "body"]
     },
@@ -38,8 +91,10 @@
         { "type": "string" },
         {
           "type": "array",
-          "items": { "type": "string" },
-          "description": "Each string represents a line; all lines will be joined with a newline separator."
+          "items": {
+            "type": "string"
+          },
+          "description": "Each string represents a line. When rendered, all lines are concatenated with a newline separator so authors can keep long code or formulas readable."
         }
       ]
     },
@@ -52,8 +107,9 @@
           { "$ref": "#/definitions/inlines" }
         ]
       },
-      "description": "An array of block elements. For convenience and flexibility, a single inline element or a list of inlines can also be used as a block. This allows for concise markup when only a single image, video, or other inline content should be displayed as a standalone block, without requiring explicit wrapping in a block element."
+      "description": "An ordered list of block‑level elements. For convenience, a single inline (or an array of inlines) can also stand in as a block so authors don't have to wrap e.g. a lone image inside a `Paragraph`."
     },
+
     "Block": {
       "oneOf": [
         { "$ref": "#/definitions/Paragraph" },

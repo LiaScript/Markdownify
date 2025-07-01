@@ -1,7 +1,7 @@
 // @ts-ignore
 import { Elm } from './elm/Worker.elm'
 
-export default function liascriptify(json: any): Promise<string> {
+function liascriptify(json: any): Promise<string> {
   return new Promise((resolve, reject) => {
     const app = Elm.Worker.init({
       flags: typeof json === 'string' ? json : JSON.stringify(json),
@@ -16,3 +16,7 @@ export default function liascriptify(json: any): Promise<string> {
     })
   })
 }
+
+;(window as any)['LiaScriptify'] = liascriptify
+
+export default liascriptify

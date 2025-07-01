@@ -1,5 +1,6 @@
 example/
 src/
+docs/
 elm-stuff/
 .parcel-cache/
 elm.json

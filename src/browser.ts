@@ -18,5 +18,3 @@ function liascriptify(json: any): Promise<string> {
 }
 
 ;(window as any)['LiaScriptify'] = liascriptify
-
-export default liascriptify

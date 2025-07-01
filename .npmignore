@@ -8,3 +8,4 @@ tsconfig.json
 doc.json
 test.json
 node_modules/
+test.html

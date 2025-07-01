@@ -7,7 +7,7 @@
   "scripts": {
     "watch": "npx parcel serve src/index.html --open",
     "build": "rm -rf dist && npm run build:browser && npm run build:lib",
-    "build:lib": "rm -rf dist && npx parcel build src/lib.ts",
+    "build:lib": "npx parcel build src/lib.ts",
     "build:browser": "npx parcel build src/browser.ts",
     "docs": "npx parcel build src/index.html --dist-dir docs --public-url ./"
   },

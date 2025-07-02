@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="index.js"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        height: 100vh;
+        display: flex;
+        flex-direction: row;
+      }
+      textarea {
+        width: 50vw;
+        height: 100vh;
+        box-sizing: border-box;
+        resize: none;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="json"></textarea>
+    <textarea id="liascript"></textarea>
+
+    <script type="module">
+      import * as example from '../example.json'
+      let json = JSON.stringify(example, null, 2)
+      document.getElementById('json').value = json
+
+      document.getElementById('json').addEventListener('input', (e) => {
+        updateLiaScript(e.target.value)
+      })
+
+      function updateLiaScript(jsonStr) {
+        const result = LiaScriptify(jsonStr)
+
+        document.getElementById('liascript').value = result || ''
+      }
+
+      updateLiaScript(json)
+    </script>
+  </body>
+</html>
